@@ -132,40 +132,48 @@ def clean(pts):
             i += 1
     return out
 
-def candidates(A, B, off=0):
+LANE = 16   # how far a port moves along its side to give an edge its own lane
+
+def candidates(A, B, oa=0, ob=0):
+    """Orthogonal route shapes from A to B. oa/ob move each end along its side (a lane).
+    Each candidate is (shape, points, side at A, side at B)."""
     sx = 1 if B.cx > A.cx else -1
     sy = 1 if B.top > A.top else -1
     a_side, b_side = ("right", "left") if sx > 0 else ("left", "right")
     a_v, b_v = ("bottom", "top") if sy > 0 else ("top", "bottom")
-    P = lambda n, side: n.port(side, off)
-    ax, bx, aty, bty = A.cx + off, B.cx + off, A.ty + off, B.ty + off
+    ax, bx, aty, bty = A.cx + oa, B.cx + ob, A.ty + oa, B.ty + ob
     c = []
     if abs(A.top - B.top) < 1:
-        c.append(("straight", [P(A, a_side), P(B, b_side)]))
-        yb = max(A.bottom, B.bottom) + 30 + off
-        c.append(("under", [P(A, "bottom"), (ax, yb), (bx, yb), P(B, "bottom")]))
-        ya = min(A.top, B.top) - 30 + off
-        c.append(("over", [P(A, "top"), (ax, ya), (bx, ya), P(B, "top")]))
+        if oa == ob:
+            c.append(("straight", [A.port(a_side, oa), B.port(b_side, ob)], a_side, b_side))
+        yb = max(A.bottom, B.bottom) + 30
+        c.append(("under", [A.port("bottom", oa), (ax, yb), (bx, yb), B.port("bottom", ob)], "bottom", "bottom"))
+        ya = min(A.top, B.top) - 30
+        c.append(("over", [A.port("top", oa), (ax, ya), (bx, ya), B.port("top", ob)], "top", "top"))
     elif abs(A.cx - B.cx) < 1:
-        c.append(("straight", [P(A, a_v), P(B, b_v)]))
+        if oa == ob:
+            c.append(("straight", [A.port(a_v, oa), B.port(b_v, ob)], a_v, b_v))
         for side, name in ((1, "right"), (-1, "left")):
-            x = A.cx + side * COL / 2 + off
-            c.append(("around", [P(A, name), (x, aty), (x, bty), P(B, name)]))
+            x = A.cx + side * COL / 2
+            c.append(("around", [A.port(name, oa), (x, aty), (x, bty), B.port(name, ob)], name, name))
     else:
-        c.append(("hv", [P(A, a_side), (bx, aty), P(B, b_v)]))
-        c.append(("vh", [P(A, a_v), (ax, bty), P(B, b_side)]))
+        c.append(("hv", [A.port(a_side, oa), (bx, aty), B.port(b_v, ob)], a_side, b_v))
+        c.append(("vh", [A.port(a_v, oa), (ax, bty), B.port(b_side, ob)], a_v, b_side))
         bands = (B.top - 34, A.bottom + 34) if sy > 0 else (B.bottom + 34, A.top - 34)
         for ym in bands:
-            c.append(("vhv", [P(A, a_v), (ax, ym + off), (bx, ym + off), P(B, b_v)]))
+            c.append(("vhv", [A.port(a_v, oa), (ax, ym), (bx, ym), B.port(b_v, ob)], a_v, b_v))
         for xm in ((A.cx + B.cx) / 2, B.cx - sx * COL / 2, A.cx + sx * COL / 2):
-            c.append(("hvh", [P(A, a_side), (xm + off, aty), (xm + off, bty), P(B, b_side)]))
-    # number repeated shapes (vhv0, vhv1) so a mirrored partner can pick the exact same one
-    seen = {}
-    out = []
-    for name, pts in c:
+            c.append(("hvh", [A.port(a_side, oa), (xm, aty), (xm, bty), B.port(b_side, ob)], a_side, b_side))
+    # number repeated shapes (vhv0, vhv1) so a route hint can name the exact one
+    seen, out = {}, []
+    for name, pts, sa, sb in c:
         k = seen.get(name, 0); seen[name] = k + 1
-        out.append((f"{name}{k}", clean(pts)))
+        out.append((f"{name}{k}", clean(pts), sa, sb))
     return out
+
+def port_clash(node, side, off, direction, ports):
+    """An edge leaving a port another edge arrives at (or the reverse) reads as one line with two heads."""
+    return any(n == node and sd == side and abs(o - off) < LANE - 4 and d != direction for n, sd, o, d in ports)
 
 def score(pts, e, nodes, labels, routed):
     s, why = 0.0, []
@@ -375,24 +383,25 @@ def main():
         e["id"] = e.get("id") or f"{e['from']}--{e['to']}"
         e["_i"] = i
         edges.append(e)
-    routed = []
+    routed, ports = [], []
     for e in sorted(edges, key=lambda e: (KIND_ORDER[e["kind"]], e["_i"])):
         A, B = by[e["from"]], by[e["to"]]
-        # a two-way pair (checkout + webhook) may mirror its partner's route, 18px over
-        partner = next((o for o in routed if o["from"] == e["to"] and o["to"] == e["from"]), None)
-        cands = candidates(A, B)
-        if e.get("route"):
-            cands = [c for c in cands if c[0].startswith(e["route"])] or cands
-        mirror = []
-        if partner:
-            for side in (18, -18):
-                mirror += [("mirror", list(reversed(p))) for n, p in candidates(B, A, side) if n == partner["shape"]]
-        scored = [(score(p, e, nodes, labels, routed), name, p) for name, p in cands]
-        scored += [((sc[0], sc[1]), name, p) for name, p in mirror for sc in [score(p, e, nodes, labels, routed)]]
-        best = min(scored, key=lambda t: t[0][0])
-        (s, why), e["shape"], pts = best
-        if s >= 300:
+        scored = []
+        for oa in (0, LANE, -LANE):
+            for ob in (0, LANE, -LANE):
+                cands = candidates(A, B, oa, ob)
+                if e.get("route"):
+                    cands = [c for c in cands if c[0].startswith(e["route"])] or cands
+                for name, pts, sa, sb in cands:
+                    s, why = score(pts, e, nodes, labels, routed)
+                    s += 3 * (oa != 0) + 3 * (ob != 0)
+                    if port_clash(A.id, sa, oa, "out", ports) or port_clash(B.id, sb, ob, "in", ports):
+                        s += 250; why = why + ["shares a port with an edge going the other way"]
+                    scored.append((s, why, name, pts, (A.id, sa, oa), (B.id, sb, ob)))
+        s, why, e["shape"], pts, pa, pb = min(scored, key=lambda t: t[0])
+        if s >= 250:
             warn(f"edge {e['id']}: {'; '.join(dict.fromkeys(why))}. Move a node or add a grid column/row")
+        ports += [(*pa, "out"), (*pb, "in")]
         e["pts"] = pts
         routed.append(e)
 

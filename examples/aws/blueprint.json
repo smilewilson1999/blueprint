@@ -1,0 +1,31 @@
+{
+  "title": "Storefront on AWS",
+  "kicker": "acme / aws / 2026-11",
+  "lede": "CloudFront serves static files from S3 and sends API calls to an ALB. Fargate runs the app in a private subnet next to RDS and ElastiCache.",
+  "footer": "owner: platform team",
+  "legend": { "vendor": "AWS connection" },
+  "groups": [
+    { "id": "cloud", "label": "AWS Cloud", "icon": "aws", "style": "aws", "contains": ["cloudfront", "s3", "vpc"] },
+    { "id": "vpc", "label": "VPC", "icon": "vpc", "style": "aws-vpc", "contains": ["public", "private"] },
+    { "id": "public", "label": "Public subnet", "icon": "pub", "style": "aws-public", "contains": ["alb"] },
+    { "id": "private", "label": "Private subnet", "icon": "priv", "style": "aws-private", "contains": ["fargate", "rds", "cache"] }
+  ],
+  "nodes": [
+    { "id": "user", "name": "User", "role": "browser", "icon": "user", "tile": "bare res", "tileDark": true, "at": [0, 0] },
+    { "id": "cloudfront", "name": "Amazon CloudFront", "role": "cdn", "icon": "cloudfront", "tile": "bare", "wide": true, "at": [1.4, 0] },
+    { "id": "s3", "name": "Amazon S3", "role": "static assets", "icon": "s3", "tile": "bare", "at": [1.4, 1] },
+    { "id": "alb", "name": "Elastic Load Balancing", "role": "ALB", "icon": "alb", "tile": "bare", "wide": true, "at": [2.95, 0] },
+    { "id": "fargate", "name": "AWS Fargate", "role": "api service", "icon": "fargate", "tile": "bare", "at": [4.45, 0],
+      "note": "Two tasks per AZ behind the ALB. Scales on CPU." },
+    { "id": "rds", "name": "Amazon RDS", "role": "postgres", "icon": "rds", "tile": "bare", "at": [5.75, 0] },
+    { "id": "cache", "name": "Amazon ElastiCache", "role": "redis", "icon": "cache", "tile": "bare", "wide": true, "at": [5.75, 1] }
+  ],
+  "edges": [
+    { "from": "user", "to": "cloudfront", "label": "HTTPS", "kind": "primary", "step": 1, "say": "The browser hits the CDN" },
+    { "from": "cloudfront", "to": "alb", "label": "/api/*", "kind": "vendor", "step": 2, "say": "API paths go to the load balancer" },
+    { "from": "cloudfront", "to": "s3", "label": "static", "kind": "vendor" },
+    { "from": "alb", "to": "fargate", "kind": "vendor", "step": 3, "say": "The ALB forwards to a Fargate task" },
+    { "from": "fargate", "to": "rds", "label": "SQL", "kind": "vendor", "step": 4, "say": "The app queries Postgres" },
+    { "from": "fargate", "to": "cache", "label": "cache", "kind": "vendor" }
+  ]
+}

@@ -45,6 +45,7 @@ pixel, the group boxes, the edge routes and the label positions.
 | `at` | `[col, row]` on the grid. Fractions are fine (`1.5` centers between two columns). |
 | `tile` | `""` (light tile), `"dark"` (white or light logos), `"wide"` (wide marks), `"bare"`, `"bare res"` (vendor icons that carry their own square). |
 | `wide` | `true` widens the node to 176px for long names. |
+| `tileDark` | `true` swaps in `<icon>_dark` on the tile in the dark theme (for bare vendor glyphs such as AWS's General-User). |
 | `note` | Shown in the inspector on click: what it does, why it was chosen. One or two sentences. |
 | `link` | Optional URL shown in the inspector (repo, dashboard, docs). |
 
@@ -83,8 +84,9 @@ members instead.
 A deploy edge whose target is a whole platform points at the most representative
 node inside that group, labeled `deploy`.
 
-A two-way pair (a call and its webhook) is fine: the second edge either runs
-parallel to the first or takes its own clear route.
+A two-way pair (a call and its webhook) is fine. When an edge would leave a port
+another edge arrives at, the build moves it 16px along that side into its own
+lane, so the two never read as one line with two heads.
 
 ## What the build checks
 

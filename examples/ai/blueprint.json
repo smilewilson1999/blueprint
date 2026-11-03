@@ -1,0 +1,29 @@
+{
+  "title": "Docs chatbot",
+  "kicker": "acme / internal tools / 2026-11",
+  "lede": "Answers questions from the company's Notion docs with Claude. Inngest re-indexes Notion every night.",
+  "footer": "owner: internal tools",
+  "flows": [
+    { "id": "ask", "label": "Question" },
+    { "id": "ingest", "label": "Nightly sync" }
+  ],
+  "groups": [
+    { "id": "vercel", "label": "Vercel", "icon": "vercel", "tone": "neutral", "contains": ["next"] },
+    { "id": "anthropic", "label": "Anthropic", "icon": "anthropic", "contains": ["claude"] }
+  ],
+  "nodes": [
+    { "id": "user", "name": "User", "role": "browser", "icon": "user", "at": [0, 0] },
+    { "id": "next", "name": "Next.js", "role": "chat ui", "icon": "nextjs", "at": [1.5, 0], "note": "Streams answers back with citations to the Notion page." },
+    { "id": "claude", "name": "Claude", "role": "llm", "icon": "claude", "at": [3.2, 0] },
+    { "id": "supabase", "name": "Supabase", "role": "pgvector", "icon": "supabase", "at": [1.5, 1] },
+    { "id": "inngest", "name": "Inngest", "role": "ingest jobs", "icon": "inngest", "at": [3.2, 1] },
+    { "id": "notion", "name": "Notion", "role": "company docs", "icon": "notion", "at": [4.6, 1] }
+  ],
+  "edges": [
+    { "from": "user", "to": "next", "label": "question", "kind": "primary", "flow": "ask", "step": 1, "say": "Someone asks a question" },
+    { "from": "next", "to": "supabase", "label": "vector search", "kind": "primary", "flow": "ask", "step": 2, "say": "The app finds the closest doc chunks" },
+    { "from": "next", "to": "claude", "label": "prompt", "kind": "primary", "flow": "ask", "step": 3, "say": "Claude answers from those chunks" },
+    { "from": "notion", "to": "inngest", "label": "nightly sync", "kind": "async", "flow": "ingest" },
+    { "from": "inngest", "to": "supabase", "label": "embeddings", "flow": "ingest" }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "title": "Storefront on Azure",
+  "kicker": "acme / azure / 2026-11",
+  "lede": "Front Door serves static files from Blob Storage and sends API calls to App Service, which reaches SQL and Redis through private endpoints.",
+  "footer": "owner: platform team",
+  "groups": [
+    { "id": "cloud", "label": "Azure", "icon": "azure", "style": "azure", "contains": ["fd", "blob", "region"] },
+    { "id": "region", "label": "Japan East", "style": "azure-region", "contains": ["app", "vnet"] },
+    { "id": "vnet", "label": "Virtual network", "icon": "vnet", "style": "azure-vnet", "contains": ["sql", "redis"] }
+  ],
+  "nodes": [
+    { "id": "user", "name": "User", "role": "browser", "icon": "user", "at": [0, 0] },
+    { "id": "fd", "name": "Azure Front Door", "role": "global edge", "icon": "fd", "wide": true, "at": [1.45, 0] },
+    { "id": "blob", "name": "Azure Blob Storage", "role": "static assets", "icon": "blob", "wide": true, "at": [1.45, 1] },
+    { "id": "app", "name": "Azure App Service", "role": "api", "icon": "app", "wide": true, "at": [2.95, 0] },
+    { "id": "sql", "name": "Azure SQL Database", "role": "private endpoint", "icon": "sql", "wide": true, "at": [4.5, 0] },
+    { "id": "redis", "name": "Azure Managed Redis", "role": "private endpoint", "icon": "redis", "wide": true, "at": [4.5, 1] }
+  ],
+  "edges": [
+    { "from": "user", "to": "fd", "label": "HTTPS", "kind": "primary", "step": 1, "say": "The browser reaches Front Door" },
+    { "from": "fd", "to": "app", "label": "/api", "kind": "primary", "step": 2, "say": "API paths go to App Service" },
+    { "from": "app", "to": "sql", "label": "SQL", "kind": "primary", "step": 3, "say": "The API queries SQL over a private endpoint" },
+    { "from": "fd", "to": "blob", "label": "static" },
+    { "from": "app", "to": "redis", "label": "cache" }
+  ]
+}

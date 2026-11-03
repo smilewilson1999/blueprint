@@ -1,0 +1,26 @@
+{
+  "title": "Storefront on Google Cloud",
+  "kicker": "acme / gcp / 2026-11",
+  "lede": "A global load balancer serves static files from Cloud Storage and sends API calls to GKE. GKE, Cloud SQL and Memorystore run in one region of a VPC.",
+  "footer": "owner: platform team",
+  "groups": [
+    { "id": "cloud", "label": "Google Cloud", "icon": "gcp", "style": "gcp", "contains": ["lb", "gcs", "vpc"] },
+    { "id": "vpc", "label": "VPC network", "style": "gcp-vpc", "contains": ["region"] },
+    { "id": "region", "label": "us-central1", "style": "gcp-region", "contains": ["gke", "sql", "memorystore"] }
+  ],
+  "nodes": [
+    { "id": "user", "name": "User", "role": "browser", "icon": "user", "at": [0, 0] },
+    { "id": "lb", "name": "Cloud Load Balancing", "role": "global https", "icon": "lb", "wide": true, "at": [1.45, 0] },
+    { "id": "gcs", "name": "Cloud Storage", "role": "static assets", "icon": "gcs", "at": [1.45, 1] },
+    { "id": "gke", "name": "Google Kubernetes Engine", "role": "api pods", "icon": "gke", "wide": true, "at": [3.05, 0] },
+    { "id": "sql", "name": "Cloud SQL", "role": "postgres", "icon": "sql", "at": [4.45, 0] },
+    { "id": "memorystore", "name": "Memorystore", "role": "redis", "icon": "memorystore", "at": [4.45, 1] }
+  ],
+  "edges": [
+    { "from": "user", "to": "lb", "label": "HTTPS", "kind": "primary", "step": 1, "say": "The browser reaches the global load balancer" },
+    { "from": "lb", "to": "gke", "label": "/api", "kind": "primary", "step": 2, "say": "API paths go to GKE" },
+    { "from": "gke", "to": "sql", "label": "SQL", "kind": "primary", "step": 3, "say": "Pods query Cloud SQL" },
+    { "from": "lb", "to": "gcs", "label": "static" },
+    { "from": "gke", "to": "memorystore", "label": "cache" }
+  ]
+}
