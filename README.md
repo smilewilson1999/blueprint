@@ -1,8 +1,9 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/cover-dark.png">
+  <img src="docs/cover.png" alt="blueprint: architecture diagrams your team can actually review. An interactive diagram in a tilted window with a guest comment pinned to Neon" width="100%">
+</picture>
+
 <div align="center">
-
-# blueprint
-
-**Architecture diagrams your team can actually review.**
 
 Describe your stack in a sentence. Your agent draws it with official logos, one clear request path,<br>and an interactive page that reviewers can comment on.
 
@@ -11,13 +12,6 @@ Describe your stack in a sentence. Your agent draws it with official logos, one 
 **English** · [繁體中文](README.zh-TW.md) · [日本語](README.ja.md)
 
 </div>
-
-<br>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/hero-dark.png">
-  <img src="docs/hero.png" alt="Architecture diagram: a user reaches Next.js on Vercel over HTTPS; Next.js calls a Hono API over RPC; Hono queries Neon over SQL, checks sessions with Clerk and starts checkout with Stripe, which calls back with a webhook; GitHub Actions deploys" width="100%">
-</picture>
 
 <p align="center"><sub><i>"Diagram our stack: Next.js and a Hono API on Vercel. Postgres on Neon, auth with Clerk, payments with Stripe. GitHub Actions deploys."</i></sub></p>
 
@@ -33,7 +27,7 @@ In the Claude apps, download `blueprint.zip` from [Releases](https://github.com/
 
 ## It's a page, not a picture
 
-<img src="docs/demo.gif" alt="Demo: hovering a component lights up what it talks to, the Request path tab dims everything off the path, clicking Hono opens the inspector, and the theme switches to dark" width="100%">
+<img src="docs/demo.webp" alt="Demo: hovering a component lights up what it talks to, the Request path tab dims everything off the path, clicking Hono opens the inspector, and the theme switches to dark" width="100%">
 
 <table>
   <tr>

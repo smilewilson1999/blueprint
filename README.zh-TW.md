@@ -1,8 +1,9 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/cover-dark.png">
+  <img src="docs/cover.png" alt="blueprint：讓團隊真的能一起審的架構圖。傾斜視窗裡的互動架構圖，Neon 上釘著一則訪客留言" width="100%">
+</picture>
+
 <div align="center">
-
-# blueprint
-
-**讓團隊真的能一起審的架構圖。**
 
 用一句話描述你的技術架構，agent 就會畫出一張圖：官方 logo、一條清楚的請求路徑，<br>還有一個審查者可以直接留言的互動頁面。
 
@@ -11,13 +12,6 @@
 [English](README.md) · **繁體中文** · [日本語](README.ja.md)
 
 </div>
-
-<br>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/hero-dark.png">
-  <img src="docs/hero.png" alt="架構圖：使用者透過 HTTPS 連到 Vercel 上的 Next.js；Next.js 以 RPC 呼叫 Hono API；Hono 以 SQL 查詢 Neon，向 Clerk 確認 session，向 Stripe 發起結帳，Stripe 再以 webhook 回呼；GitHub Actions 負責部署" width="100%">
-</picture>
 
 <p align="center"><sub><i>「幫我畫我們的架構：Next.js 和 Hono API 跑在 Vercel，Postgres 用 Neon，登入用 Clerk，金流用 Stripe，GitHub Actions 部署。」</i></sub></p>
 
@@ -33,7 +27,7 @@ npx skills add smilewilson1999/blueprint
 
 ## 這是一個頁面，不只是一張圖
 
-<img src="docs/demo.gif" alt="示範：滑過元件時會亮出它的連線；切到 Request path 分頁時，路徑以外的部分會變淡；點 Hono 會打開 inspector；最後切換成暗色主題" width="100%">
+<img src="docs/demo.webp" alt="示範：滑過元件時會亮出它的連線；切到 Request path 分頁時，路徑以外的部分會變淡；點 Hono 會打開 inspector；最後切換成暗色主題" width="100%">
 
 <table>
   <tr>

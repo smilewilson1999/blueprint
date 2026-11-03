@@ -1,8 +1,9 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/cover-dark.png">
+  <img src="docs/cover.png" alt="blueprint：チームでちゃんとレビューできるアーキテクチャ図。傾いたウィンドウの中のインタラクティブな図と、Neon に付いたゲストのコメント" width="100%">
+</picture>
+
 <div align="center">
-
-# blueprint
-
-**チームでちゃんとレビューできるアーキテクチャ図。**
 
 技術スタックを一文で伝えるだけ。エージェントが公式ロゴと一本の明快なリクエスト経路で図を描き、<br>レビュアーがそのままコメントできるインタラクティブなページに仕上げます。
 
@@ -11,13 +12,6 @@
 [English](README.md) · [繁體中文](README.zh-TW.md) · **日本語**
 
 </div>
-
-<br>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/hero-dark.png">
-  <img src="docs/hero.png" alt="アーキテクチャ図：ユーザーが HTTPS で Vercel 上の Next.js にアクセスし、Next.js が RPC で Hono API を呼び出す。Hono は SQL で Neon を参照し、Clerk でセッションを確認し、Stripe で決済を開始する。Stripe は webhook で応答する。GitHub Actions がデプロイする" width="100%">
-</picture>
 
 <p align="center"><sub><i>「うちのスタックを図にして。Next.js と Hono の API を Vercel で、Postgres は Neon、認証は Clerk、決済は Stripe。デプロイは GitHub Actions。」</i></sub></p>
 
@@ -33,7 +27,7 @@ Claude アプリでは、[Releases](https://github.com/smilewilson1999/blueprint
 
 ## 画像ではなく、ページです
 
-<img src="docs/demo.gif" alt="デモ：コンポーネントにカーソルを合わせると接続先が光り、Request path タブで経路以外が薄くなり、Hono をクリックするとインスペクタが開き、テーマがダークに切り替わる" width="100%">
+<img src="docs/demo.webp" alt="デモ：コンポーネントにカーソルを合わせると接続先が光り、Request path タブで経路以外が薄くなり、Hono をクリックするとインスペクタが開き、テーマがダークに切り替わる" width="100%">
 
 <table>
   <tr>
