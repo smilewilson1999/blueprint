@@ -27,6 +27,13 @@ CREDITS = {"svgl": "svgl", "devicon": "devicon", "gilbarbara": "gilbarbara/logos
            "aws": "AWS Architecture Icons", "gcp": "Google Cloud product icons",
            "azure": "Azure Public Service Icons", "url": "brand sites"}
 
+TOKEN = re.compile(r"[A-Za-z0-9_-]+")   # class names and icon names go into attributes unescaped
+
+def token(value, what):
+    if not TOKEN.fullmatch(str(value)):
+        sys.exit(f"{what} {value!r} must be letters, digits, '-' or '_'")
+    return value
+
 warnings = []
 def warn(msg): warnings.append(msg)
 esc = lambda s: html.escape(str(s), quote=True)
@@ -263,6 +270,21 @@ def main():
     spec = json.loads(pathlib.Path(args[0]).read_text(encoding="utf-8"))
     icondir, out = pathlib.Path(args[1]), pathlib.Path(args[2])
 
+    for d in spec["nodes"]:
+        token(d["id"], "node id")
+        for t in d.get("tile", "").split(): token(t, "tile class")
+        if d.get("icon"): token(d["icon"], "icon")
+        if d.get("link") and not re.match(r"https?://", d["link"]):
+            sys.exit(f"node {d['id']}: link must start with http:// or https://")
+    for g in spec.get("groups", []):
+        token(g["id"], "group id")
+        for k in ("style", "tone", "icon"):
+            if g.get(k): token(g[k], f"group {k}")
+    for e in spec.get("edges", []):
+        if e.get("id"): token(e["id"], "edge id")
+        if e.get("flow"): token(e["flow"], "edge flow")
+    for f in spec.get("flows", []):
+        token(f["id"], "flow id")
     nodes = [Node(d) for d in spec["nodes"]]
     by = {n.id: n for n in nodes}
     if len(by) != len(nodes):
