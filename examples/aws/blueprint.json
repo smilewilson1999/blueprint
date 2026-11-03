@@ -24,7 +24,7 @@
     { "from": "user", "to": "cloudfront", "label": "HTTPS", "kind": "primary", "step": 1, "say": "The browser hits the CDN" },
     { "from": "cloudfront", "to": "alb", "label": "/api/*", "kind": "vendor", "step": 2, "say": "API paths go to the load balancer" },
     { "from": "cloudfront", "to": "s3", "label": "static", "kind": "vendor" },
-    { "from": "alb", "to": "fargate", "kind": "vendor", "step": 3, "say": "The ALB forwards to a Fargate task" },
+    { "from": "alb", "to": "fargate", "label": "HTTP", "kind": "vendor", "step": 3, "say": "The ALB forwards to a Fargate task" },
     { "from": "fargate", "to": "rds", "label": "SQL", "kind": "vendor", "step": 4, "say": "The app queries Postgres" },
     { "from": "fargate", "to": "cache", "label": "cache", "kind": "vendor" }
   ]

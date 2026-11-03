@@ -314,24 +314,39 @@ def main():
         return out
 
     rect = {}
+    def align(gids):
+        """Sibling groups side by side share top and bottom edges, the way a row of subnets is drawn."""
+        for a in gids:
+            for b in gids:
+                if a >= b: continue
+                ra, rb = rect[a], rect[b]
+                overlap = min(ra[3], rb[3]) - max(ra[1], rb[1])
+                if overlap > .5 * min(ra[3] - ra[1], rb[3] - rb[1]) and not hits(ra, rb):
+                    top, bottom = min(ra[1], rb[1]), max(ra[3], rb[3])
+                    rect[a] = (ra[0], top, ra[2], bottom); rect[b] = (rb[0], top, rb[2], bottom)
+
     def grect(gid):
         if gid in rect: return rect[gid]
         g = groups[gid]
         st = style_of(g, gid in parent)
         px, pt, pb, band = pads(st)
+        kids = [m for m in g.get("contains", []) if m in groups]
+        for m in kids: grect(m)
+        align(kids)
         exts = []
         for m in g.get("contains", []):
             if m in by:
                 n = by[m]; b = n.box()
                 exts.append((b[0] - px, n.top - pt, b[2] + px, b[3] + pb))
             else:
-                c = grect(m)
-                exts.append((c[0] - 16, c[1] - band, c[2] + 16, c[3] + 18))
+                c = rect[m]
+                exts.append((c[0] - 14, c[1] - band, c[2] + 14, c[3] + 14))
         if not exts:
             sys.exit(f"group {gid} is empty")
         rect[gid] = (min(e[0] for e in exts), min(e[1] for e in exts), max(e[2] for e in exts), max(e[3] for e in exts))
         return rect[gid]
     for gid in groups: grect(gid)
+    align([g for g in groups if g not in parent])
 
     # translate so the drawing starts at MARGIN
     xs0 = [n.box()[0] for n in nodes] + [r[0] for r in rect.values()]

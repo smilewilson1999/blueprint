@@ -13,15 +13,15 @@
   ],
   "nodes": [
     { "id": "user", "name": "User", "role": "browser", "icon": "user", "at": [0, 0] },
-    { "id": "next", "name": "Next.js", "role": "frontend", "icon": "nextjs", "at": [1.4, 0],
+    { "id": "next", "name": "Next.js", "role": "frontend", "icon": "nextjs", "at": [1.3, 0],
       "note": "App Router. Renders the storefront and calls the API over typed RPC." },
     { "id": "hono", "name": "Hono", "role": "api routes", "icon": "hono", "at": [2.6, 0],
       "note": "Mounted at /api. Owns sessions, orders and the Stripe webhook." },
-    { "id": "neon", "name": "Neon", "role": "serverless postgres", "icon": "neon", "at": [4, 0],
+    { "id": "neon", "name": "Neon", "role": "serverless postgres", "icon": "neon", "at": [3.9, 0],
       "note": "Primary database. Branch per preview deploy." },
     { "id": "clerk", "name": "Clerk", "role": "auth", "icon": "clerk", "at": [2.6, 1] },
-    { "id": "stripe", "name": "Stripe", "role": "payments", "icon": "stripe", "at": [4, 1] },
-    { "id": "actions", "name": "GitHub Actions", "role": "ci", "icon": "actions", "at": [0, 1], "wide": true }
+    { "id": "stripe", "name": "Stripe", "role": "payments", "icon": "stripe", "at": [3.9, 1] },
+    { "id": "actions", "name": "GitHub Actions", "role": "ci", "icon": "actions", "at": [1.3, 1], "wide": true }
   ],
   "edges": [
     { "from": "user", "to": "next", "label": "HTTPS", "kind": "primary", "flow": "request", "step": 1, "say": "The browser loads the storefront" },

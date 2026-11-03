@@ -41,17 +41,17 @@ Works with Claude Code, Codex, Cursor and [any agent that supports skills](https
     </td>
     <td width="50%" valign="top">
       <h3>Flows you can switch</h3>
-      Request path, nightly sync, deploy. Each flow is a tab that lights up its own edges and dims the rest.
+      Request path, nightly sync, deploy. Each flow gets its own tab that lights up its edges and quietly dims the rest.
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
       <h3>An inspector for every part</h3>
-      Hover a component to see what it talks to. Click it for its role, why it's there, and a link to its repo or dashboard.
+      Hover a component to see what it talks to. Click it for its role, why it's there, and a link to its repo.
     </td>
     <td width="50%" valign="top">
       <h3>Built to be commented on</h3>
-      Every name, role and edge label is real text with a stable id, so feedback pins to the component it's about and stays there across versions.
+      Names, roles and labels are real text with stable ids, so feedback pins to its component and stays across versions.
     </td>
   </tr>
 </table>
@@ -113,6 +113,12 @@ Need a static image? Every diagram also renders to light and dark PNGs for Slack
     </td>
   </tr>
 </table>
+
+## Light and dark
+
+Every diagram ships with both themes and follows the reader's system setting. Tiles stay light so each logo keeps its own colors, and group marks switch to the brand's dark-theme version.
+
+<img src="docs/light-dark.png" alt="The docs chatbot diagram cut diagonally: light theme on the upper left, dark theme on the lower right" width="100%">
 
 ## Official logos, never redrawn
 
