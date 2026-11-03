@@ -2,7 +2,7 @@
 """Record the README demo: a scripted walk through a built blueprint page, saved as a GIF.
 
 Usage:
-  python3 tools/record_demo.py examples/saas/index.html docs/demo.gif
+  python3 tools/record_demo.py examples/saas/index.html out.gif
 
 Needs Playwright with Chromium and ffmpeg. Frames are captured one at a time, so the
 page's own CSS animations are slowed to match the capture speed and every frame stands
