@@ -6,7 +6,7 @@
 
 用一句話描述你的技術架構，agent 就會畫出一張圖：官方 logo、一條清楚的請求路徑，<br>還有一個審查者可以直接留言的互動頁面。
 
-[![License](https://img.shields.io/github/license/smilewilson1999/blueprint?color=B25F28&labelColor=2B2622)](LICENSE) [![Agent skill](https://img.shields.io/badge/agent-skill-B25F28?labelColor=2B2622)](https://agentskills.io) [![Review on artifact.cafe](https://img.shields.io/badge/review-artifact.cafe-B25F28?labelColor=2B2622)](https://artifact.cafe)
+[![Release](https://img.shields.io/github/v/release/smilewilson1999/blueprint?color=B25F28&labelColor=2B2622)](https://github.com/smilewilson1999/blueprint/releases/latest) [![License](https://img.shields.io/github/license/smilewilson1999/blueprint?color=B25F28&labelColor=2B2622)](LICENSE) [![Agent skill](https://img.shields.io/badge/agent-skill-B25F28?labelColor=2B2622)](https://agentskills.io) [![Review on artifact.cafe](https://img.shields.io/badge/review-artifact.cafe-B25F28?labelColor=2B2622)](https://artifact.cafe)
 
 [English](README.md) · **繁體中文** · [日本語](README.ja.md)
 
@@ -28,6 +28,8 @@ npx skills add smilewilson1999/blueprint
 ```
 
 支援 Claude Code、Codex、Cursor，以及[其他支援 skills 的 agent](https://agentskills.io)。裝好之後，直接請它畫圖就行。
+
+在 Claude apps 裡，請從 [Releases](https://github.com/smilewilson1999/blueprint/releases/latest) 下載 `blueprint.zip`，再當成 skill 上傳。
 
 ## 這是一個頁面，不只是一張圖
 

@@ -6,7 +6,7 @@
 
 Describe your stack in a sentence. Your agent draws it with official logos, one clear request path,<br>and an interactive page that reviewers can comment on.
 
-[![License](https://img.shields.io/github/license/smilewilson1999/blueprint?color=B25F28&labelColor=2B2622)](LICENSE) [![Agent skill](https://img.shields.io/badge/agent-skill-B25F28?labelColor=2B2622)](https://agentskills.io) [![Review on artifact.cafe](https://img.shields.io/badge/review-artifact.cafe-B25F28?labelColor=2B2622)](https://artifact.cafe)
+[![Release](https://img.shields.io/github/v/release/smilewilson1999/blueprint?color=B25F28&labelColor=2B2622)](https://github.com/smilewilson1999/blueprint/releases/latest) [![License](https://img.shields.io/github/license/smilewilson1999/blueprint?color=B25F28&labelColor=2B2622)](LICENSE) [![Agent skill](https://img.shields.io/badge/agent-skill-B25F28?labelColor=2B2622)](https://agentskills.io) [![Review on artifact.cafe](https://img.shields.io/badge/review-artifact.cafe-B25F28?labelColor=2B2622)](https://artifact.cafe)
 
 **English** · [繁體中文](README.zh-TW.md) · [日本語](README.ja.md)
 
@@ -28,6 +28,8 @@ npx skills add smilewilson1999/blueprint
 ```
 
 Works with Claude Code, Codex, Cursor and [any agent that supports skills](https://agentskills.io). Then just ask for a diagram.
+
+In the Claude apps, download `blueprint.zip` from [Releases](https://github.com/smilewilson1999/blueprint/releases/latest) and upload it as a skill.
 
 ## It's a page, not a picture
 

@@ -6,7 +6,7 @@
 
 技術スタックを一文で伝えるだけ。エージェントが公式ロゴと一本の明快なリクエスト経路で図を描き、<br>レビュアーがそのままコメントできるインタラクティブなページに仕上げます。
 
-[![License](https://img.shields.io/github/license/smilewilson1999/blueprint?color=B25F28&labelColor=2B2622)](LICENSE) [![Agent skill](https://img.shields.io/badge/agent-skill-B25F28?labelColor=2B2622)](https://agentskills.io) [![Review on artifact.cafe](https://img.shields.io/badge/review-artifact.cafe-B25F28?labelColor=2B2622)](https://artifact.cafe)
+[![Release](https://img.shields.io/github/v/release/smilewilson1999/blueprint?color=B25F28&labelColor=2B2622)](https://github.com/smilewilson1999/blueprint/releases/latest) [![License](https://img.shields.io/github/license/smilewilson1999/blueprint?color=B25F28&labelColor=2B2622)](LICENSE) [![Agent skill](https://img.shields.io/badge/agent-skill-B25F28?labelColor=2B2622)](https://agentskills.io) [![Review on artifact.cafe](https://img.shields.io/badge/review-artifact.cafe-B25F28?labelColor=2B2622)](https://artifact.cafe)
 
 [English](README.md) · [繁體中文](README.zh-TW.md) · **日本語**
 
@@ -28,6 +28,8 @@ npx skills add smilewilson1999/blueprint
 ```
 
 Claude Code、Codex、Cursor など、[skills に対応したエージェント](https://agentskills.io)で使えます。あとは図を頼むだけです。
+
+Claude アプリでは、[Releases](https://github.com/smilewilson1999/blueprint/releases/latest) から `blueprint.zip` をダウンロードし、skill としてアップロードしてください。
 
 ## 画像ではなく、ページです
 
