@@ -3,3 +3,7 @@ dist/
 __pycache__/
 .ruff_cache/
 .DS_Store
+
+# example builds embed third-party logos: rebuild them locally
+examples/*/icons/
+examples/*/index.html

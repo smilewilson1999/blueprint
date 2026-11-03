@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="{{LANG}}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{TITLE}}</title>
+<style>
+/* Cafe OS: neutral room, warm details. Every color and font flows through these tokens. */
+:root {
+  color-scheme: light;
+  --canvas:    #F7F7F4;
+  --surface:   #FFFFFF;
+  --ink:       #2B2622;
+  --ink-2:     #6F695F;
+  --ink-3:     #8F8A80;
+  --line:      #EAE8E3;
+  --line-2:    #DCD8CE;
+  --amber:     #B25F28;
+  --amber-ink: #8A4A1B;
+  --trim:      #F6EFE2;
+  --trim-line: #E8DCC4;
+  --green:     #6F8259;  --green-tint: #E9EEE1; --green-line: #CFDABE; --green-ink: #55663F;
+  --bluegray:  #7C93A6;  --blue-tint:  #E5EBF0; --blue-line:  #CBD7E0; --blue-ink:  #4E6478;
+  --neutral-tint: #EFEEEA; --neutral-line: #E1DFD8;
+  --tile:      #FFFFFF;
+  --tile-dark: #2B2622;
+  --dot:       #DFDBD2;
+  --edge-primary:  var(--amber);
+  --edge-internal: #8A8378;
+  --edge-async:    var(--bluegray);
+  --edge-dev:      #A39D92;
+  --shadow-tile: 0 1px 0 rgba(43,38,34,.04), 0 1px 3px rgba(43,38,34,.06);
+  --shadow-win:  0 1px 0 rgba(43,38,34,.03), 0 12px 32px -18px rgba(43,38,34,.22);
+  --font-ui:   "Inter", "Hiragino Sans", "Noto Sans CJK JP", "Noto Sans TC", "PingFang TC", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* Dark: the terminal tone as the room. Tiles stay light so brand marks keep their own colors. */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --canvas:    #1E1A17;
+  --surface:   #26221E;
+  --ink:       #EDE8DF;
+  --ink-2:     #B3ACA0;
+  --ink-3:     #8C857A;
+  --line:      #36302A;
+  --line-2:    #463F37;
+  --amber:     #DB8A52;
+  --amber-ink: #EBA877;
+  --trim:      #2E2722;
+  --trim-line: #4A3D30;
+  --green:     #94A97C;  --green-tint: #262B21; --green-line: #3C4732; --green-ink: #B5C79E;
+  --bluegray:  #98AEC0;  --blue-tint:  #222830; --blue-line:  #36414D; --blue-ink:  #B4C6D6;
+  --neutral-tint: #2A2622; --neutral-line: #3D3731;
+  --tile:      #FBF9F5;
+  --tile-dark: #3A332D;
+  --dot:       #2E2925;
+  --edge-internal: #9C958A;
+  --edge-dev:      #7D766C;
+  --shadow-tile: 0 1px 0 rgba(0,0,0,.2), 0 2px 6px rgba(0,0,0,.25);
+  --shadow-win:  0 1px 0 rgba(0,0,0,.2), 0 16px 36px -18px rgba(0,0,0,.6);
+}
+@font-face { font-family:"Inter"; font-style:normal; font-weight:100 900; font-display:swap;
+  src:url(data:font/woff2;base64,%%FONT_INTER%%) format("woff2"); }
+@font-face { font-family:"IBM Plex Mono"; font-style:normal; font-weight:400; font-display:swap;
+  src:url(data:font/woff2;base64,%%FONT_MONO_400%%) format("woff2"); }
+@font-face { font-family:"IBM Plex Mono"; font-style:normal; font-weight:500; font-display:swap;
+  src:url(data:font/woff2;base64,%%FONT_MONO_500%%) format("woff2"); }
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { overflow-x: clip; }
+body { background: var(--canvas); color: var(--ink); font-family: var(--font-ui);
+  font-feature-settings: "cv11", "ss01"; -webkit-font-smoothing: antialiased;
+  padding: 48px 24px 72px; }
+.page { width: fit-content; max-width: 100%; margin: 0 auto; }
+.mono { font-family: var(--font-mono); }
+
+/* header */
+.head { display:grid; grid-template-columns: 1fr auto; gap: 32px; align-items:end; margin-bottom: 20px; }
+.kicker { font-family: var(--font-mono); font-size: 11.5px; color: var(--amber); letter-spacing: .02em; margin-bottom: 10px; }
+h1 { font-weight: 600; font-size: clamp(24px, 3.4vw, 32px); letter-spacing: -0.018em; line-height: 1.15; text-wrap: balance; }
+.lede { max-width: 340px; font-size: 13.5px; line-height: 1.6; color: var(--ink-2); text-wrap: pretty; }
+@media (max-width: 720px) { .head { grid-template-columns: 1fr; align-items:start; gap: 12px; } .lede { max-width:none; } }
+
+/* toolbar */
+.bar { display:flex; justify-content:space-between; align-items:center; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+.seg { display:inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
+.seg button { font: 500 12px/1 var(--font-ui); color: var(--ink-2); background: none; border: 0; border-radius: 6px;
+  padding: 7px 11px; cursor: pointer; transition: background .2s var(--ease), color .2s var(--ease); }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--trim); color: var(--amber-ink); box-shadow: inset 0 0 0 1px var(--trim-line); }
+.icon-btn { display:grid; place-items:center; width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink-2); cursor: pointer; }
+.icon-btn:hover { color: var(--ink); }
+.icon-btn svg { width: 15px; height: 15px; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+/* canvas */
+.scroller { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--canvas); }
+.canvas { position: relative; background-color: var(--canvas);
+  background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+  background-size: 22px 22px; background-position: 11px 11px; }
+
+/* groups: top-level groups are small OS windows; nested ones are dashed zones */
+.group { position:absolute; border-radius: 12px; }
+.group.window { background: color-mix(in oklab, var(--surface) 72%, transparent); border: 1px solid var(--line-2);
+  box-shadow: var(--shadow-win); }
+.group.window > .g-bar { position:absolute; inset: 0 0 auto 0; height: 32px; display:flex; align-items:center; gap: 8px;
+  padding: 0 12px; border-bottom: 1px solid var(--trim-line); background: var(--trim); border-radius: 11px 11px 0 0; }
+.group.window.tone-neutral > .g-bar { background: var(--neutral-tint); border-color: var(--neutral-line); }
+.group.window.tone-green   > .g-bar { background: var(--green-tint);   border-color: var(--green-line); }
+.group.window.tone-blue    > .g-bar { background: var(--blue-tint);    border-color: var(--blue-line); }
+.g-bar .g-name { font-size: 12.5px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.g-bar .g-meta { margin-left: auto; font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); white-space: nowrap; }
+.g-bar img, .g-label img { width: 15px; height: 15px; object-fit: contain; }
+.group.zone { border: 1px dashed var(--line-2); background: color-mix(in oklab, var(--canvas) 40%, transparent); }
+.group.zone.tone-amber { border-color: var(--trim-line); background: color-mix(in oklab, var(--trim) 45%, transparent); }
+.group.zone.tone-green { border-color: var(--green-line); background: color-mix(in oklab, var(--green-tint) 45%, transparent); }
+.group.zone.tone-blue  { border-color: var(--blue-line);  background: color-mix(in oklab, var(--blue-tint) 45%, transparent); }
+.g-label { position:absolute; top: 11px; left: 12px; display:flex; align-items:center; gap: 7px;
+  font-size: 12px; font-weight: 600; color: var(--ink-2); white-space: nowrap; }
+.g-label .g-meta { font-family: var(--font-mono); font-size: 10.5px; font-weight: 400; color: var(--ink-3); }
+/* brand marks with a dark-theme variant swap in place; marks with black parts get a light plate */
+img.dk { display:none; }
+[data-theme="dark"] img.lt { display:none; }
+[data-theme="dark"] img.dk { display:block; }
+[data-theme="dark"] img.plate { background: var(--tile); border-radius: 3px; padding: 2px; width: 19px; height: 19px; }
+
+/* vendor areas follow each cloud's own drawing rules (references/vendors.md) */
+.group.aws { border: 1.5px solid var(--ink); border-radius: 0; }
+.group.aws > .g-label { top:-1.5px; left:-1.5px; gap: 8px; color: var(--ink); }
+.group.aws > .g-label img { width: 30px; height: 30px; }
+.group.aws-region, .group.aws-az { border-color: #00A4A6; border-style: dashed; }
+.group.aws-az > .g-label, .group.aws > .g-label:not(:has(img)) { top: 8px; left: 12px; }
+.group.aws-vpc { border-color: #8C4FFF; }
+.group.aws-private { border-color: #00A4A6; }
+.group.aws-public { border-color: #7AA116; }
+.group.gcp, .group.azure { border: 1.5px solid #4285F4; border-radius: 6px; }
+.group.azure { border-color: #0078D4; }
+.group.gcp > .g-label, .group.azure > .g-label { gap: 8px; color: var(--ink); }
+.group.gcp > .g-label img, .group.azure > .g-label img { width: 20px; height: 20px; }
+.group.gcp-region, .group.azure-region { border-color: var(--line-2); background: color-mix(in oklab, var(--surface) 55%, transparent); }
+.group.gcp-vpc { border: 1.5px dashed var(--ink-2); }
+.group.gcp-subnet { border: 1px dashed var(--ink-3); }
+.group.gcp-zone { border-color: #34A853; }
+.group.azure-rg { border: 1.5px dashed #0096D7; }
+.group.azure-vnet { border: 1.5px solid #A4CBFB; }
+.group.azure-subnet { border: 1px solid #A4CBFB; }
+.group.azure-zone { border-color: #FFD965; }
+
+/* nodes: text stays real and selectable so review comments can quote it */
+.node { position:absolute; text-align:center; cursor: pointer; border-radius: 10px; outline-offset: 4px;
+  transition: opacity .25s var(--ease); }
+.tile { width: 64px; height: 64px; margin: 0 auto; border-radius: 14px; background: var(--tile);
+  border: 1px solid var(--line-2); display:grid; place-items:center; box-shadow: var(--shadow-tile);
+  transition: border-color .2s var(--ease), box-shadow .2s var(--ease), transform .2s var(--ease); }
+.tile img { width: 34px; height: 34px; object-fit: contain; }
+.tile.wide img { width: 46px; }
+.tile.dark { background: var(--tile-dark); border-color: var(--tile-dark); }
+.tile.bare { background: none; border: none; box-shadow: none; }
+.tile.bare img { width: 64px; height: 64px; }
+.tile.bare.res img { width: 46px; height: 46px; }
+.node.primary .tile { border-color: color-mix(in oklab, var(--amber) 30%, var(--line-2)); }
+.node:hover .tile, .node.sel .tile { border-color: var(--amber); transform: translateY(-1px); }
+.node .name { display:block; margin-top: 10px; font-size: 13.5px; font-weight: 600; letter-spacing: -0.005em; line-height: 1.3; }
+.node .role { display:block; margin-top: 1px; font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); line-height: 1.4; }
+/* veil behind label text: a crossing edge fades behind the words instead of striking through them */
+.node .name span, .node .role span { background: color-mix(in oklab, var(--canvas) 80%, transparent);
+  padding: 0 4px; border-radius: 3px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.node .badge { position:absolute; top: -7px; left: calc(50% + 22px); min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: 9px; font: 500 10px/18px var(--font-mono); color: var(--surface); background: var(--amber); }
+
+/* edges */
+svg.edges { position:absolute; inset:0; pointer-events:none; overflow: visible; }
+svg.edges path.e { fill:none; stroke-linecap: round; stroke-linejoin: round; transition: opacity .25s var(--ease), stroke-width .2s var(--ease); }
+.k-primary  { stroke: var(--edge-primary);  stroke-width: 1.75; }
+.k-internal { stroke: var(--edge-internal); stroke-width: 1.4; }
+.k-async    { stroke: var(--edge-async);    stroke-width: 1.4; stroke-dasharray: 7 5; }
+.k-dev      { stroke: var(--edge-dev);      stroke-width: 1.3; stroke-dasharray: 2 5; }
+.k-vendor   { stroke: var(--ink);           stroke-width: 1.5; }
+.k-vendor.dev { stroke-dasharray: 4 5; }
+.m-primary  { fill: var(--edge-primary); }
+.m-internal { fill: var(--edge-internal); }
+.m-async    { fill: var(--edge-async); }
+.m-dev      { fill: var(--edge-dev); }
+.m-vendor   { fill: none; stroke: var(--ink); stroke-width: 1.4; }
+path.pulse { fill:none; stroke: var(--amber); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 1 14;
+  opacity: 0; transition: opacity .25s var(--ease); }
+
+/* edge labels are HTML chips sitting on the line */
+.chip { position:absolute; transform: translate(-50%, -50%); display:inline-flex; align-items:center; gap: 5px;
+  height: 20px; padding: 0 7px; border-radius: 6px; white-space: nowrap;
+  font: 400 10.5px/1 var(--font-mono); color: var(--ink-2); background: var(--surface); border: 1px solid var(--line);
+  transition: opacity .25s var(--ease); }
+.chip.k-primary { color: var(--amber-ink); background: var(--trim); border-color: var(--trim-line); }
+.chip.k-async { color: var(--blue-ink); background: var(--blue-tint); border-color: var(--blue-line); }
+.chip.k-vendor { color: var(--ink); }
+.chip .step { display:inline-grid; place-items:center; width: 14px; height: 14px; margin-left: -3px; border-radius: 50%;
+  font: 500 9px/1 var(--font-mono); color: var(--surface); background: var(--amber); }
+
+/* focus states: hover a node or pick a flow, everything else steps back */
+.canvas.focus .node:not(.on), .canvas.focus .chip:not(.on) { opacity: .28; }
+.canvas.focus path.e:not(.on) { opacity: .14; }
+.canvas.focus path.e.on { stroke-width: 2.1; }
+.canvas.flowing path.pulse.on { opacity: .9; animation: march 1.1s linear infinite; }
+@keyframes march { to { stroke-dashoffset: -15; } }
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+  .canvas.flowing path.pulse.on { opacity: 0; }
+}
+
+/* below the canvas: legend, flow narrative, inspector */
+.under { display:grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; margin-top: 16px; }
+@media (max-width: 860px) { .under { grid-template-columns: 1fr; } }
+.legend { display:flex; gap: 18px; flex-wrap: wrap; align-items:center; font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); margin-bottom: 14px; }
+.legend svg { width: 28px; height: 8px; vertical-align: middle; margin-right: 6px; overflow: visible; }
+.steps { list-style: none; display:grid; gap: 2px; }
+.steps li { display:grid; grid-template-columns: 22px 1fr; gap: 8px; align-items: baseline; padding: 6px 8px; border-radius: 8px;
+  font-size: 13px; line-height: 1.5; color: var(--ink-2); cursor: default; }
+.steps li:hover { background: var(--surface); color: var(--ink); }
+.steps .n { display:inline-grid; place-items:center; width: 18px; height: 18px; border-radius: 50%;
+  font: 500 10px/1 var(--font-mono); color: var(--surface); background: var(--amber); transform: translateY(3px); }
+.steps .via { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+.panel { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; align-self: start; }
+.panel .p-bar { height: 30px; display:flex; align-items:center; padding: 0 12px; background: var(--trim);
+  border-bottom: 1px solid var(--trim-line); font-family: var(--font-mono); font-size: 10.5px; color: var(--amber-ink); }
+.panel .p-body { padding: 14px 14px 16px; font-size: 13px; line-height: 1.55; color: var(--ink-2); }
+.panel .p-empty { color: var(--ink-3); }
+.panel h2 { font-size: 15px; font-weight: 600; color: var(--ink); letter-spacing: -0.01em; }
+.panel .p-role { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+.panel .p-path { font-family: var(--font-mono); font-size: 10.5px; color: var(--amber-ink); margin-bottom: 8px; }
+.panel .p-note { margin-top: 10px; color: var(--ink); }
+.panel .p-links { margin-top: 12px; display:grid; gap: 4px; }
+.panel .p-links div { display:flex; gap: 8px; font-size: 12.5px; }
+.panel .p-links .dir { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); width: 28px; flex: none; padding-top: 2px; }
+.panel a { color: var(--amber); text-underline-offset: 2px; }
+
+.foot { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line); display:flex; justify-content:space-between;
+  gap: 16px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-3); }
+.foot a { color: inherit; text-decoration-color: var(--line-2); text-underline-offset: 2px; }
+.foot a:hover { color: var(--amber); }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="head">
+    <div>
+      {{KICKER}}
+      <h1>{{TITLE}}</h1>
+    </div>
+    {{LEDE}}
+  </header>
+
+  <div class="bar">
+    <div class="seg" role="group" aria-label="Flows">{{FLOW_TABS}}</div>
+    <button class="icon-btn" id="theme" type="button" aria-label="Toggle dark theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    </button>
+  </div>
+
+  <div class="scroller">
+    <div class="canvas" id="canvas" style="width:{{W}}px;height:{{H}}px">
+{{GROUPS}}
+      <svg class="edges" width="{{W}}" height="{{H}}" viewBox="0 0 {{W}} {{H}}" aria-hidden="true">
+        <defs>
+          <marker id="ar-primary" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="m-primary" d="M1 1.2 L9.2 5 L1 8.8 L2.6 5 z"/></marker>
+          <marker id="ar-internal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="m-internal" d="M1 1.2 L9.2 5 L1 8.8 L2.6 5 z"/></marker>
+          <marker id="ar-async" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="m-async" d="M1 1.2 L9.2 5 L1 8.8 L2.6 5 z"/></marker>
+          <marker id="ar-dev" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="m-dev" d="M1 1.2 L9.2 5 L1 8.8 L2.6 5 z"/></marker>
+          <marker id="ar-vendor" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="m-vendor" d="M1.5 1.5 L9 5 L1.5 8.5"/></marker>
+        </defs>
+{{EDGES}}
+      </svg>
+{{CHIPS}}
+{{NODES}}
+    </div>
+  </div>
+
+  <div class="under">
+    <div>
+      <div class="legend">{{LEGEND}}</div>
+      <ol class="steps" id="steps"></ol>
+    </div>
+    <aside class="panel" aria-live="polite">
+      <div class="p-bar">inspector</div>
+      <div class="p-body" id="inspector"><p class="p-empty">Select a component to see what it does and what it talks to.</p></div>
+    </aside>
+  </div>
+
+  <footer class="foot">
+    <span>{{FOOT_LEFT}}</span>
+    <span>{{FOOT_RIGHT}}</span>
+  </footer>
+</div>
+
+<script type="application/json" id="bp-model">{{MODEL}}</script>
+<script>
+(() => {
+  const model = JSON.parse(document.getElementById('bp-model').textContent);
+  const canvas = document.getElementById('canvas');
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const byId = Object.fromEntries(model.nodes.map(n => [n.id, n]));
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  let flow = 'all', selected = null;
+
+  // light up a set of edges and the nodes they touch; dim everything else
+  function light(edgeIds, nodeIds, flowing) {
+    $$('.on', canvas).forEach(el => el.classList.remove('on'));
+    canvas.classList.toggle('focus', !!edgeIds);
+    canvas.classList.toggle('flowing', !!flowing);
+    if (!edgeIds) return;
+    edgeIds.forEach(id => $$(`[data-edge="${id}"]`, canvas).forEach(el => el.classList.add('on')));
+    nodeIds.forEach(id => $(`[data-node="${id}"]`, canvas)?.classList.add('on'));
+  }
+  function edgesOfFlow(f) { return model.edges.filter(e => e.flow === f); }
+  function touch(edges) { return [...new Set(edges.flatMap(e => [e.from, e.to]))]; }
+  function restFlow() {
+    if (flow === 'all') return light(null);
+    const es = edgesOfFlow(flow);
+    light(es.map(e => e.id), touch(es), true);
+  }
+  function focusNode(id) {
+    const es = model.edges.filter(e => e.from === id || e.to === id);
+    light(es.map(e => e.id), [id, ...touch(es)], false);
+  }
+
+  // flow narrative: numbered edges of the active flow, or every numbered edge
+  function renderSteps() {
+    const list = $('#steps');
+    const es = model.edges.filter(e => e.step && (flow === 'all' || e.flow === flow)).sort((a, b) => a.step - b.step);
+    list.innerHTML = es.map(e => `<li data-edge="${e.id}"><span><span class="n">${e.step}</span></span><span>${esc(e.say || `${byId[e.from].name} to ${byId[e.to].name}`)}${e.label ? ` <span class="via">· ${esc(e.label)}</span>` : ''}</span></li>`).join('');
+    $$('li', list).forEach(li => {
+      li.addEventListener('mouseenter', () => { const e = model.edges.find(x => x.id === li.dataset.edge); light([e.id], [e.from, e.to], true); });
+      li.addEventListener('mouseleave', restFlow);
+    });
+  }
+
+  function inspect(id) {
+    selected = id;
+    $$('.node.sel', canvas).forEach(el => el.classList.remove('sel'));
+    const box = $('#inspector');
+    if (!id) { box.innerHTML = '<p class="p-empty">Select a component to see what it does and what it talks to.</p>'; return; }
+    $(`[data-node="${id}"]`, canvas).classList.add('sel');
+    const n = byId[id];
+    const row = (dir, e, other) => `<div><span class="dir">${dir}</span><span>${esc(byId[other].name)}${e.label ? ` <span class="via mono">· ${esc(e.label)}</span>` : ''}</span></div>`;
+    const out = model.edges.filter(e => e.from === id).map(e => row('to', e, e.to));
+    const inc = model.edges.filter(e => e.to === id).map(e => row('from', e, e.from));
+    box.innerHTML = (n.path ? `<div class="p-path">${esc(n.path)}</div>` : '') +
+      `<h2>${esc(n.name)}</h2>` + (n.role ? `<div class="p-role">${esc(n.role)}</div>` : '') +
+      (n.note ? `<p class="p-note">${esc(n.note)}</p>` : '') +
+      ((out.length || inc.length) ? `<div class="p-links">${inc.join('')}${out.join('')}</div>` : '') +
+      (n.link ? `<p class="p-links"><a href="${esc(n.link)}" target="_blank" rel="noopener">${esc(n.link.replace(/^https?:\/\//, ''))}</a></p>` : '');
+  }
+
+  $$('.node', canvas).forEach(el => {
+    const id = el.dataset.node;
+    el.addEventListener('mouseenter', () => focusNode(id));
+    el.addEventListener('mouseleave', restFlow);
+    el.addEventListener('focus', () => focusNode(id));
+    el.addEventListener('blur', restFlow);
+    // a drag that selects text is a reviewer quoting it, not a click
+    el.addEventListener('click', () => { if (!getSelection().isCollapsed) return; inspect(selected === id ? null : id); });
+    el.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); inspect(selected === id ? null : id); } });
+  });
+  $$('.seg button').forEach(b => b.addEventListener('click', () => {
+    flow = b.dataset.flow;
+    $$('.seg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    renderSteps(); restFlow();
+  }));
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { inspect(null); restFlow(); } });
+
+  const root = document.documentElement;
+  if (!root.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches) root.dataset.theme = 'dark';
+  $('#theme').addEventListener('click', () => { root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark'; });
+  if (!model.flows.length) $('.seg').hidden = true;
+  renderSteps();
+})();
+</script>
+</body>
+</html>
