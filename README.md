@@ -47,10 +47,16 @@ In the Claude apps, download `blueprint.zip` from [Releases](https://github.com/
     </td>
     <td width="50%" valign="top">
       <h3>Built to be commented on</h3>
-      Names, roles and labels are real text with stable ids, so feedback pins to its component and stays across versions.
+      Names, roles and labels are real text with stable ids, so a comment's anchor can be found again after you revise the diagram.
     </td>
   </tr>
 </table>
+
+## Comment on any part
+
+Reviewers click a component, an edge label or any text and leave a note. No account, no sign-in. Each comment is pinned to the part it's about, and the list keeps every thread in one place.
+
+<img src="docs/review.png" alt="Three guest comments on the checkout diagram: amber pins on Neon, the webhook label and Clerk, beside the comment list showing each thread with its target" width="100%">
 
 ## How it works
 
@@ -69,7 +75,7 @@ In the Claude apps, download `blueprint.zip` from [Releases](https://github.com/
 
 **2. The build does the drawing.** It sizes every group from its members, routes edges around nodes and labels, gives two-way pairs their own lanes, and flags every overlap it finds, so the agent fixes problems before you ever see them.
 
-**3. You review it on artifact.cafe.** The result is one self-contained HTML file. Your agent publishes it to [artifact.cafe](https://artifact.cafe) and hands you a link. Reviewers comment without an account; when the architecture changes, the agent publishes the next version and earlier comments stay attached to the parts they were about.
+**3. You review it on artifact.cafe.** The result is one self-contained HTML file. Your agent publishes it to [artifact.cafe](https://artifact.cafe) and hands you a link. Reviewers comment without an account; when the architecture changes, the agent publishes the next version. Each comment stays with the version it was made on, and one whose anchor no longer matches is marked outdated, never lost.
 
 Need a static image? Every diagram also renders to light and dark PNGs for Slack, slides and READMEs.
 

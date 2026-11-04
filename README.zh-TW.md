@@ -47,10 +47,16 @@ npx skills add smilewilson1999/blueprint
     </td>
     <td width="50%" valign="top">
       <h3>生來就是給人留言的</h3>
-      名稱、角色和標籤都是真正的文字並有固定 id，留言會釘在元件上，改版也不跑掉。
+      名稱、角色和標籤都是真正的文字並有固定 id，改版之後，留言的錨點才找得回來。
     </td>
   </tr>
 </table>
+
+## 對任何一處留言
+
+審查者可以點任何元件、連線標籤或文字直接留言，不用註冊，也不用登入。每則留言都釘在它討論的地方，右側的留言列表把所有討論收在一起。
+
+<img src="docs/review.png" alt="結帳架構圖上的三則訪客留言：琥珀色的釘選標記落在 Neon、webhook 標籤和 Clerk 上，旁邊的留言列表顯示每則討論和它所指的位置" width="100%">
 
 ## 運作方式
 
@@ -69,7 +75,7 @@ npx skills add smilewilson1999/blueprint
 
 **2. 由 build 負責畫。** 它依成員自動算出群組大小，讓連線繞開節點和標籤，雙向的連線各走各的車道。它也會把找到的每一處重疊都標出來，agent 在你看到之前就會先修好。
 
-**3. 在 artifact.cafe 上審。** 產出的是一個自給自足的 HTML 檔。agent 把它發佈到 [artifact.cafe](https://artifact.cafe)，給你一個連結。審查者不用註冊就能留言；架構改了，agent 發佈新版本，舊的留言仍然留在原本討論的元件上。
+**3. 在 artifact.cafe 上審。** 產出的是一個自給自足的 HTML 檔。agent 把它發佈到 [artifact.cafe](https://artifact.cafe)，給你一個連結。審查者不用註冊就能留言；架構改了，agent 發佈新版本；每則留言都留在它當時的那一版，錨點對不上新版的會標成 outdated，不會消失。
 
 需要靜態圖嗎？每張圖也都能輸出亮色和暗色兩種 PNG，貼 Slack、放簡報或寫 README 都方便。
 

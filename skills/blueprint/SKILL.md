@@ -99,8 +99,10 @@ diagram's title as the artifact title. Share the review URL. Reviewers can
 comment on any node name, role, edge label or step without an account.
 
 When comments come back, change `blueprint.json`, rebuild, and publish the next
-version into the same artifact, keeping node ids, so earlier threads stay
-attached to the components they're about. Reply to each thread with what changed.
+version into the same artifact. Keep node ids and names stable where the
+component is unchanged: comments belong to the version they were made on, and
+an unchanged anchor is what lets a thread be found again in the next one.
+Reply to each thread with what changed.
 
 Also on request:
 
