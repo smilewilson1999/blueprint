@@ -12,6 +12,7 @@ copy the new files over, reapply these patches, and rerun the checks at the end.
 | --- | --- |
 | `SKILL.md` → `TEARDOWN.md` | Renamed, content unchanged, so skill installers don't mistake the engine for a second skill named `teardown` |
 | `scripts/test-*.cjs` | Not copied; they test the upstream skill itself |
+| `agents/openai.yaml` | Not copied; it describes the upstream skill's own listing |
 | `assets/viewer.js` | Three patches, below |
 | `assets/viewer.html` | One patch, below |
 
