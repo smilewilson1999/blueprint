@@ -1,0 +1,89 @@
+{
+  "dependencies": "node_modules",
+  "modelScripts": [
+    "model.js"
+  ],
+  "drawings": [
+    {
+      "id": "cowos",
+      "title": "CoWoS-style 2.5D package",
+      "description": "Illustrative concept of a 2.5D advanced package, not to scale: the vertical axis is exaggerated and every dimension is invented. Organic substrate on BGA balls, a silicon interposer on C4 bumps with through-silicon vias, an SoC die and HBM stacks on micro-bumps, thermal interface material and a copper lid.",
+      "parts": [
+        {
+          "id": "lid",
+          "name": "Copper lid"
+        },
+        {
+          "id": "tim",
+          "name": "Thermal interface material"
+        },
+        {
+          "id": "soc",
+          "name": "SoC die"
+        },
+        {
+          "id": "hbm",
+          "name": "HBM stacks"
+        },
+        {
+          "id": "ubump",
+          "name": "Micro-bumps"
+        },
+        {
+          "id": "interposer",
+          "name": "Silicon interposer"
+        },
+        {
+          "id": "c4",
+          "name": "C4 bumps"
+        },
+        {
+          "id": "substrate",
+          "name": "Organic substrate"
+        },
+        {
+          "id": "bga",
+          "name": "BGA solder balls"
+        }
+      ],
+      "parameters": [
+        {
+          "key": "hbmPerSide",
+          "label": "HBM stacks per side",
+          "min": 1,
+          "max": 3,
+          "default": 2,
+          "step": 1
+        },
+        {
+          "key": "dramLayers",
+          "label": "DRAM layers per stack",
+          "min": 4,
+          "max": 16,
+          "default": 8,
+          "step": 4
+        }
+      ],
+      "colors": {
+        "hues": {
+          "lid": 55,
+          "tim": 100,
+          "soc": 290,
+          "hbm": 185,
+          "ubump": 85,
+          "interposer": 245,
+          "c4": 85,
+          "substrate": 150,
+          "bga": 85
+        },
+        "fills": [
+          "lid",
+          "soc",
+          "hbm",
+          "interposer",
+          "substrate"
+        ]
+      }
+    }
+  ]
+}
