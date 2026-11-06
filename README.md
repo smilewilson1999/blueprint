@@ -1,6 +1,6 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/cover-dark.png">
-  <img src="docs/cover.png" alt="blueprint: architecture diagrams your team can actually review. An interactive diagram in a tilted window with a guest comment pinned to Neon" width="100%">
+  <img src="docs/cover.png" alt="blueprint: diagrams and teardowns your team can actually review. An architecture diagram with a guest comment pinned to Neon, in front of an exploded chip package" width="100%">
 </picture>
 
 <div align="center">
@@ -38,6 +38,8 @@ They work with Claude Code, Codex, Cursor and [any agent that supports skills](h
 - **An inspector for every part.** Hover to see what a component talks to; click for its role, notes and links.
 - **No pixel math.** The agent writes a short [`blueprint.json`](skills/blueprint/references/spec.md); the build lays it out, routes every edge and flags any overlap before you see it.
 
+## Gallery
+
 <table>
   <tr>
     <td width="50%" valign="top">
@@ -71,20 +73,16 @@ They work with Claude Code, Codex, Cursor and [any agent that supports skills](h
       <p><b>Azure</b><br><sub>Private endpoints in a VNet, full service names as Microsoft asks.</sub></p>
     </td>
   </tr>
+  <tr>
+    <td colspan="2" valign="top">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/teardown-gallery-dark.png">
+        <img src="docs/teardown-gallery.png" alt="A CoWoS-style package shown assembled, then exploded into nine labelled parts from BGA solder balls to the copper lid" width="100%">
+      </picture>
+      <p><b>Chip package, with blueprint-teardown</b><br><sub>A CoWoS-style package, assembled and exploded. Sliders for HBM stacks and DRAM layers; SVG, PNG and PDF downloads. A concept with invented dimensions.</sub></p>
+    </td>
+  </tr>
 </table>
-
-## blueprint-teardown
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/teardown-dark.png">
-  <img src="docs/teardown.png" alt="A CoWoS-style package exploded into nine labelled parts, from BGA solder balls to the copper lid, in the interactive viewer with its toolbar" width="100%">
-</picture>
-
-- **Exploded and assembled,** with a smooth transition between them and every part labelled.
-- **Parametric.** Sliders for what people argue about, such as HBM stacks per side or DRAM layers; every dependent size follows.
-- **Ready for the deck.** Download SVG, PNG or PDF, or render a demo film from the same model.
-
-The CoWoS example in [`examples/cowos`](examples/cowos) is a concept with invented dimensions.
 
 ## Review on artifact.cafe
 

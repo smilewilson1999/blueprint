@@ -1,6 +1,6 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/cover-dark.png">
-  <img src="docs/cover.png" alt="blueprint：チームでちゃんとレビューできるアーキテクチャ図。傾いたウィンドウの中のインタラクティブな図と、Neon に付いたゲストのコメント" width="100%">
+  <img src="docs/cover.png" alt="blueprint：チームでちゃんとレビューできる構成図と分解図。手前は Neon にゲストのコメントが付いた構成図、奥は分解したチップパッケージ" width="100%">
 </picture>
 
 <div align="center">
@@ -38,6 +38,8 @@ Claude Code、Codex、Cursor など、[skills に対応したエージェント]
 - **すべての部品にインスペクタ。** カーソルで接続先を、クリックで役割・メモ・リンクを表示します。
 - **座標計算は不要。** エージェントは短い [`blueprint.json`](skills/blueprint/references/spec.md) を書くだけ。ビルドがレイアウトと配線を行い、重なりはあなたが見る前にすべて検出します。
 
+## ギャラリー
+
 <table>
   <tr>
     <td width="50%" valign="top">
@@ -71,20 +73,16 @@ Claude Code、Codex、Cursor など、[skills に対応したエージェント]
       <p><b>Azure</b><br><sub>VNet 内の private endpoint。サービス名は Microsoft の求めるとおり正式名称で。</sub></p>
     </td>
   </tr>
+  <tr>
+    <td colspan="2" valign="top">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/teardown-gallery-dark.png">
+        <img src="docs/teardown-gallery.png" alt="CoWoS 型パッケージの組立図と、BGA ボールから銅製リッドまで九つのラベル付き部品に分けた分解図" width="100%">
+      </picture>
+      <p><b>チップパッケージ（blueprint-teardown）</b><br><sub>CoWoS 型パッケージの組立図と分解図。HBM スタック数と DRAM 層数はスライダーで変えられ、SVG・PNG・PDF をダウンロードできます。寸法を創作したコンセプト図です。</sub></p>
+    </td>
+  </tr>
 </table>
-
-## blueprint-teardown
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/teardown-dark.png">
-  <img src="docs/teardown.png" alt="CoWoS 型パッケージを BGA ボールから銅製リッドまで九つのラベル付き部品に分解した図。ツールバー付きのインタラクティブなビューアに表示されている" width="100%">
-</picture>
-
-- **分解図と組立図、** その間をなめらかに切り替え、すべての部品にラベルが付きます。
-- **パラメトリック。** 議論になる値はスライダーに。片側の HBM スタック数や DRAM 層数を変えると、関連する寸法がすべて追従します。
-- **そのまま資料に。** SVG・PNG・PDF をダウンロードでき、同じモデルからデモ動画も書き出せます。
-
-[`examples/cowos`](examples/cowos) の CoWoS の例は寸法を創作したコンセプト図です。
 
 ## artifact.cafe でレビュー
 

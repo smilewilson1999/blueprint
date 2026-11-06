@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-"""Render the README cover (light and dark) from the hero diagram renders.
+"""Render the README cover (light and dark): the architecture diagram in front, the
+exploded CoWoS teardown behind it, one window each.
 
 Usage:
-  python3 tools/cover.py docs/hero.png docs/hero-dark.png docs/cover.png
+  python3 tools/cover.py docs/hero.png docs/hero-dark.png docs/teardown.png docs/teardown-dark.png docs/cover.png
 
-Writes docs/cover.png and docs/cover-dark.png. Needs Playwright with Chromium.
+Writes docs/cover.png and docs/cover-dark.png. Needs Playwright with Chromium and Pillow.
 """
-import base64, pathlib, sys
+import base64, io, pathlib, sys
 
+from PIL import Image, ImageChops
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -15,6 +17,17 @@ FONTS = ROOT / "skills" / "blueprint" / "assets" / "fonts"
 W, H = 1600, 820
 
 def b64(p): return base64.b64encode(pathlib.Path(p).read_bytes()).decode()
+
+def drawing_only(path):
+    """The teardown viewer screenshot without its toolbar, cropped to the drawing."""
+    im = Image.open(path).convert("RGB")
+    body = im.crop((0, 0, im.width, int(im.height * .86)))
+    bg = body.getpixel((4, 4))
+    box = ImageChops.difference(body, Image.new("RGB", body.size, bg)).convert("L").point(lambda v: 255 if v > 18 else 0).getbbox()
+    pad = 24
+    crop = body.crop((box[0] - pad, box[1] - pad, box[2] + pad, box[3] + pad))
+    buf = io.BytesIO(); crop.save(buf, "PNG")
+    return base64.b64encode(buf.getvalue()).decode(), '#%02x%02x%02x' % bg
 
 PAGE = """<!doctype html><html data-theme="{theme}"><meta charset="utf-8"><style>
 @font-face {{ font-family: Inter; font-weight: 100 900; src: url(data:font/woff2;base64,{inter}) format("woff2"); }}
@@ -48,8 +61,13 @@ body {{ width:{w}px; height:{h}px; overflow:hidden; background:var(--bg); font-f
   background:var(--chip); border:1px solid var(--chip-line); font: 400 15px/1 Plex; color:var(--ink);
   box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 10px 30px -18px var(--shadow); }}
 .cmd em {{ font-style:normal; color:var(--amber); }}
-.stage {{ position:absolute; right:64px; top:146px; perspective:2400px; }}
-.win {{ width:900px; border-radius:16px; overflow:hidden; background:var(--win-bg); border:1px solid var(--win-line);
+.stage {{ position:absolute; right:236px; top:262px; perspective:2400px; }}
+.stage2 {{ position:absolute; right:58px; top:52px; perspective:2400px; }}
+.win2 {{ width:372px; border-radius:16px; overflow:hidden; background:{tdbg}; border:1px solid var(--win-line);
+  transform: rotateY(-16deg) rotateX(6deg) rotateZ(1deg); transform-origin: 100% 50%; opacity:.97;
+  box-shadow: 0 2px 0 rgba(255,255,255,.05) inset, 0 50px 100px -40px var(--shadow), 0 24px 50px -30px var(--shadow); }}
+.win2 img {{ display:block; width:100%; }}
+.win {{ width:720px; border-radius:16px; overflow:hidden; background:var(--win-bg); border:1px solid var(--win-line);
   transform: rotateY(-16deg) rotateX(6deg) rotateZ(1deg); transform-origin: 100% 50%;
   box-shadow: 0 2px 0 rgba(255,255,255,.05) inset, 0 60px 120px -40px var(--shadow), 0 30px 60px -30px var(--shadow); position:relative; }}
 .bar {{ height:40px; display:flex; align-items:center; gap:8px; padding:0 16px; background:var(--win-bar); border-bottom:1px solid var(--win-line); }}
@@ -68,11 +86,15 @@ body {{ width:{w}px; height:{h}px; overflow:hidden; background:var(--bg); font-f
 <body>
 <div class="glow"></div><div class="dots"></div><div class="grain"></div>
 <div class="copy">
-  <div class="pill"><i></i>agent skill · reviewed on artifact.cafe</div>
+  <div class="pill"><i></i>two agent skills · reviewed on artifact.cafe</div>
   <div class="word">blueprint<span>.</span></div>
-  <div class="line">Architecture diagrams<br><b>your team can actually review.</b></div>
+  <div class="line">Diagrams and teardowns<br><b>your team can actually review.</b></div>
   <div class="cmd"><em>$</em> npx skills add smilewilson1999/blueprint</div>
 </div>
+<div class="stage2"><div class="win2">
+  <div class="bar"><i></i><i></i><i></i><span class="t">CoWoS package</span><span class="v">teardown</span></div>
+  <img src="data:image/png;base64,{td}">
+</div></div>
 <div class="stage"><div class="win">
   <div class="bar"><i></i><i></i><i></i><span class="t">Acme checkout platform</span><span class="v">v2</span></div>
   <img src="data:image/png;base64,{img}">
@@ -82,14 +104,16 @@ body {{ width:{w}px; height:{h}px; overflow:hidden; background:var(--bg); font-f
 </body></html>"""
 
 def main():
-    light, dark, out = sys.argv[1:4]
+    light, dark, td_light, td_dark, out = sys.argv[1:6]
     out = pathlib.Path(out)
     with sync_playwright() as p:
         b = p.chromium.launch(args=["--font-render-hinting=none"])
         pg = b.new_page(viewport={"width": W, "height": H}, device_scale_factor=1.5)
-        for theme, img, path in (("light", light, out), ("dark", dark, out.with_name(out.stem + "-dark" + out.suffix))):
-            pg.set_content(PAGE.format(theme=theme, w=W, h=H, img=b64(img), inter=b64(FONTS / "Inter.woff2"),
-                                       mono=b64(FONTS / "IBMPlexMono-400.woff2"), px=803, py=128, cx=652, cy=48))
+        for theme, img, td, path in (("light", light, td_light, out), ("dark", dark, td_dark, out.with_name(out.stem + "-dark" + out.suffix))):
+            td_img, td_bg = drawing_only(td)
+            # the comment pin sits on Neon; positions scale with the 720 px window
+            pg.set_content(PAGE.format(theme=theme, w=W, h=H, img=b64(img), td=td_img, tdbg=td_bg, inter=b64(FONTS / "Inter.woff2"),
+                                       mono=b64(FONTS / "IBMPlexMono-400.woff2"), px=640, py=110, cx=402, cy=36))
             pg.wait_for_timeout(500)
             pg.screenshot(path=str(path))
             print(f"wrote {path}")

@@ -1,6 +1,6 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/cover-dark.png">
-  <img src="docs/cover.png" alt="blueprint：讓團隊真的能一起審的架構圖。傾斜視窗裡的互動架構圖，Neon 上釘著一則訪客留言" width="100%">
+  <img src="docs/cover.png" alt="blueprint：讓團隊真的能一起審的架構圖與拆解圖。前方是 Neon 上釘著訪客留言的架構圖，後方是一個爆炸分解的晶片封裝" width="100%">
 </picture>
 
 <div align="center">
@@ -38,6 +38,8 @@ npx skills add smilewilson1999/blueprint --skill blueprint-teardown
 - **每個元件都能點開看。** 滑過去看它跟誰相連，點下去看它的角色、說明和連結。
 - **不用算座標。** agent 只寫一份簡短的 [`blueprint.json`](skills/blueprint/references/spec.md)，build 負責排版、繞線，還會在你看到之前先抓出所有重疊。
 
+## 範例
+
 <table>
   <tr>
     <td width="50%" valign="top">
@@ -71,20 +73,16 @@ npx skills add smilewilson1999/blueprint --skill blueprint-teardown
       <p><b>Azure</b><br><sub>VNet 裡的 private endpoint，服務名稱照 Microsoft 要求寫全名。</sub></p>
     </td>
   </tr>
+  <tr>
+    <td colspan="2" valign="top">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/teardown-gallery-dark.png">
+        <img src="docs/teardown-gallery.png" alt="CoWoS 式封裝先顯示組合狀態，再拆成九個附標註的部件，從 BGA 錫球到銅蓋" width="100%">
+      </picture>
+      <p><b>晶片封裝，用 blueprint-teardown 畫</b><br><sub>CoWoS 式封裝的組合與爆炸視圖。HBM 數量和 DRAM 層數可以用滑桿調整，可下載 SVG、PNG、PDF。概念圖，尺寸為虛構。</sub></p>
+    </td>
+  </tr>
 </table>
-
-## blueprint-teardown
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/teardown-dark.png">
-  <img src="docs/teardown.png" alt="CoWoS 式封裝拆成九個附標註的部件，從 BGA 錫球到銅蓋，顯示在可操作的 viewer 裡，下方有工具列" width="100%">
-</picture>
-
-- **爆炸與組合兩種視圖，** 之間有平滑的過場，每個部件都有標註。
-- **參數化。** 大家會爭論的數值都做成滑桿，例如每側 HBM 數量、DRAM 層數，相關尺寸全部跟著連動。
-- **直接放進簡報。** 可以下載 SVG、PNG、PDF，也能用同一個模型產出示範影片。
-
-[`examples/cowos`](examples/cowos) 裡的 CoWoS 範例是概念圖，尺寸都是虛構的。
 
 ## 在 artifact.cafe 上審
 
