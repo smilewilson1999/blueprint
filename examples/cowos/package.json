@@ -1,0 +1,16 @@
+{
+  "name": "blueprint-teardown-cowos",
+  "description": "CoWoS-style package example for blueprint-teardown",
+  "scripts": {
+    "proof": "node ../../skills/blueprint-teardown/engine/scripts/proof.cjs drawing.json proof/ --quick",
+    "build": "node ../../skills/blueprint-teardown/engine/scripts/build-viewer.cjs drawing.json dist/index.html",
+    "check": "node ../../skills/blueprint-teardown/engine/scripts/check-viewer.cjs dist/index.html check/",
+    "film": "sh film/make.sh"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "jspdf": "^4.2.1",
+    "svg2pdf.js": "^2.9.0"
+  },
+  "private": true
+}

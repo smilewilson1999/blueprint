@@ -18,7 +18,7 @@
 ## 安裝
 
 ```bash
-npx skills add smilewilson1999/blueprint
+npx skills add smilewilson1999/blueprint --skill blueprint
 ```
 
 支援 Claude Code、Codex、Cursor，以及[其他支援 skills 的 agent](https://agentskills.io)。裝好之後，直接請它畫圖就行。
@@ -122,6 +122,18 @@ npx skills add smilewilson1999/blueprint
 
 <img src="docs/light-dark.png" alt="文件問答機器人的架構圖沿對角線切開：左上是亮色主題，右下是暗色主題" width="100%">
 
+## 同一個 repo 裡：blueprint-teardown
+
+畫實體結構時，用第二個 skill。它畫的不是流程圖，而是爆炸分解圖：晶片封裝、電路板、裝置，或用一層層板子表示的抽象概念。一個參數化模型會產出一個頁面，有組合和爆炸兩種視圖、部件標註、參數滑桿，以及 SVG、PNG、PDF 下載，也能像 blueprint 的圖一樣放到 artifact.cafe 上審。
+
+<img src="docs/teardown.png" alt="CoWoS 式封裝拆成九個附標註的部件，從 BGA 錫球到銅蓋；左邊是 agent 的操作過程，右邊有三則審查留言分別釘在 HBM 堆疊、導熱介面材料和中介層上" width="100%">
+
+```bash
+npx skills add smilewilson1999/blueprint --skill blueprint-teardown
+```
+
+[`examples/cowos`](examples/cowos) 裡的 CoWoS 範例是概念圖，尺寸都是虛構的。它的 `film/` 資料夾用同一個模型產出上面這段示範影片。
+
 ## 只用官方 logo，絕不重畫
 
 logo 來自 [svgl](https://svgl.app)、[devicon](https://devicon.dev)、[gilbarbara/logos](https://github.com/gilbarbara/logos) 或品牌自己的 repo；[AWS](https://aws.amazon.com/architecture/icons/)、[Google Cloud](https://cloud.google.com/icons) 和 [Azure](https://learn.microsoft.com/en-us/azure/architecture/icons/) 則用各家的官方 icon 套件。佇列、排程這類抽象概念，用 [Lucide](https://lucide.dev) 圖示表示。logo 一律不改色：如果放在淺色底上會看不見，就改放深色底。
@@ -140,8 +152,9 @@ open index.html
 
 ## 致謝與授權
 
-blueprint 從 caru-ini 的 [stack-diagram](https://github.com/caru-ini/stack-diagram) fork 而來，保留了它的 icon 抓取流程和各家雲端的繪圖規則。
+blueprint 從 caru-ini 的 [stack-diagram](https://github.com/caru-ini/stack-diagram) fork 而來，保留了它的 icon 抓取流程和各家雲端的繪圖規則。blueprint-teardown 的繪圖引擎來自 Jakub Krehel 的 [teardown](https://github.com/jakubkrehel/skills/tree/main/skills/teardown)，我們做的修改列在 [`engine/PATCHES.md`](skills/blueprint-teardown/engine/PATCHES.md)。
 
 - 程式碼與文件：MIT，見 [`LICENSE`](LICENSE)。
+- `skills/blueprint-teardown/engine/` 裡的 teardown 引擎：MIT，Copyright (c) 2026 Jakub Krehel，見 [`engine/LICENSE`](skills/blueprint-teardown/engine/LICENSE)。
 - 內附字型（Inter、IBM Plex Mono）：SIL Open Font License 1.1，見 [`assets/fonts`](skills/blueprint/assets/fonts)。
 - logo **不**隨附在 repo 裡，而是在 build 時從上述來源下載。`docs/` 裡的圖片含有第三方 logo。所有品牌名稱與 logo 皆為各自擁有者的商標，出現在圖中不代表任何背書。
