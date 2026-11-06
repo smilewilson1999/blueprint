@@ -46,7 +46,8 @@ const initialState = d => ({
   params: defaultParams(d),
   explosion: (d.initialView ?? (d.parts.length === 1 ? 'assembled' : 'exploded')) === 'assembled' ? 0 : 1,
   preset: 'technical',
-  annotate: false,
+  // labels on by default, so review comments pinned to a part name find it
+  annotate: d.annotate ?? true,
   selectedPart: 'all',
   isolated: null
 });
@@ -66,8 +67,11 @@ function spawnWorker() {
 const renderer = DrawingRenderQueue.create(spawnWorker());
 const flipbook = DrawingFlipbook.create(spawnWorker, {
   size: Math.min(Math.max((navigator.hardwareConcurrency || 4) - 2, 2), 6),
-  ease: DrawingFlipbook.easeInOutCubic
+  ease: DrawingFlipbook.easeInOutCubic,
+  // 700 ms at 60 fps needs about 42 frames; fewer frames are ready sooner
+  frames: 40
 });
+let fadeIn = false;
 
 const state = () => states.get(selected.id);
 function colors() {
@@ -180,6 +184,15 @@ async function render(delay = 0) {
     svg = mounted.node;
     geometry = mounted.group;
     drawing.replaceChildren(svg, selection);
+    if (fadeIn) {
+      fadeIn = false;
+      svg.style.opacity = '0';
+      drawing.removeAttribute('data-fading');
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        svg.style.transition = 'opacity .32s cubic-bezier(.22, 1, .36, 1)';
+        svg.style.opacity = '';
+      }));
+    }
     styleGeometry(geometry, state().preset, resolveInk(colors()), colors());
     document.title = subject.title + ' · Technical drawing';
     setDrawingStatus('ready');
@@ -191,6 +204,8 @@ async function render(delay = 0) {
   } catch (error) {
     if (error.name === 'AbortError') return;
     console.error(error);
+    fadeIn = false;
+    drawing.removeAttribute('data-fading');
     announce('Could not update the drawing. Restore the settings and try again.', true);
     setDrawingStatus('failed');
   }
@@ -468,6 +483,11 @@ $('subject').addEventListener('change', event => selectDrawing(event.target.valu
 function setView(option) {
   const explosion = option.dataset.view === 'assembled' ? 0 : 1;
   if (!play(explosion)) {
+    // the flipbook isn't ready yet: dim the old view and fade the new one in, instead of a jump
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      drawing.setAttribute('data-fading', '');
+      fadeIn = true;
+    }
     update({explosion});
     return;
   }
