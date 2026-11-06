@@ -5,7 +5,7 @@
 
 <div align="center">
 
-Describe your stack in a sentence. Your agent draws it with official logos, one clear request path,<br>and an interactive page that reviewers can comment on.
+Describe what you're building in a sentence. Your agent draws it as an interactive page,<br>and your team reviews it on artifact.cafe, no account needed.
 
 [![Release](https://img.shields.io/github/v/release/smilewilson1999/blueprint?color=B25F28&labelColor=2B2622)](https://github.com/smilewilson1999/blueprint/releases/latest) [![License](https://img.shields.io/github/license/smilewilson1999/blueprint?color=B25F28&labelColor=2B2622)](LICENSE) [![Agent skill](https://img.shields.io/badge/agent-skill-B25F28?labelColor=2B2622)](https://agentskills.io) [![Review on artifact.cafe](https://img.shields.io/badge/review-artifact.cafe-B25F28?labelColor=2B2622)](https://artifact.cafe)
 
@@ -13,73 +13,30 @@ Describe your stack in a sentence. Your agent draws it with official logos, one 
 
 </div>
 
-<p align="center"><sub><i>"Diagram our stack: Next.js and a Hono API on Vercel. Postgres on Neon, auth with Clerk, payments with Stripe. GitHub Actions deploys."</i></sub></p>
+## Two skills
 
-## Install
+| Skill | Draws |
+| --- | --- |
+| **blueprint** | Software architecture: services, request paths, cloud infrastructure |
+| **blueprint-teardown** | Physical things, exploded: chip packages, boards, devices |
 
 ```bash
 npx skills add smilewilson1999/blueprint --skill blueprint
+npx skills add smilewilson1999/blueprint --skill blueprint-teardown
 ```
 
-Works with Claude Code, Codex, Cursor and [any agent that supports skills](https://agentskills.io). Then just ask for a diagram.
+They work with Claude Code, Codex, Cursor and [any agent that supports skills](https://agentskills.io). In the Claude apps, upload the skill's zip from [Releases](https://github.com/smilewilson1999/blueprint/releases/latest). Then just ask:
 
-In the Claude apps, download `blueprint.zip` from [Releases](https://github.com/smilewilson1999/blueprint/releases/latest) and upload it as a skill.
+> *"Diagram our stack: Next.js and a Hono API on Vercel, Postgres on Neon, auth with Clerk, payments with Stripe."*
 
-## It's a page, not a picture
+## blueprint
 
 <img src="docs/demo.webp" alt="Demo: hovering a component lights up what it talks to, the Request path tab dims everything off the path, clicking Hono opens the inspector, and the theme switches to dark" width="100%">
 
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>One path to follow</h3>
-      The request path is amber and numbered, with a plain-language step list under the diagram. Everything else steps back.
-    </td>
-    <td width="50%" valign="top">
-      <h3>Flows you can switch</h3>
-      Request path, nightly sync, deploy. Each flow gets its own tab that lights up its edges and quietly dims the rest.
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>An inspector for every part</h3>
-      Hover a component to see what it talks to. Click it for its role, why it's there, and a link to its repo.
-    </td>
-    <td width="50%" valign="top">
-      <h3>Built to be commented on</h3>
-      Names, roles and labels are real text with stable ids, so a comment's anchor can be found again after you revise the diagram.
-    </td>
-  </tr>
-</table>
-
-## Comment on any part
-
-Reviewers click a component, an edge label or any text and leave a note. No account, no sign-in. Each comment is pinned to the part it's about, and the list keeps every thread in one place.
-
-<img src="docs/review.png" alt="Three guest comments on the checkout diagram: amber pins on Neon, the webhook label and Clerk, beside the comment list showing each thread with its target" width="100%">
-
-## How it works
-
-**1. Your agent describes the system.** No coordinates, no pixel math. Nodes sit on a grid, groups list their members, edges name their ends.
-
-```json
-{
-  "groups": [{ "id": "vercel", "label": "Vercel", "icon": "vercel", "contains": ["next", "hono"] }],
-  "nodes": [
-    { "id": "next", "name": "Next.js", "role": "frontend", "icon": "nextjs", "at": [1, 0] },
-    { "id": "hono", "name": "Hono", "role": "api routes", "icon": "hono", "at": [2, 0] }
-  ],
-  "edges": [{ "from": "next", "to": "hono", "label": "RPC", "kind": "primary", "step": 2 }]
-}
-```
-
-**2. The build does the drawing.** It sizes every group from its members, routes edges around nodes and labels, gives two-way pairs their own lanes, and flags every overlap it finds, so the agent fixes problems before you ever see them.
-
-**3. You review it on artifact.cafe.** The result is one self-contained HTML file. Your agent publishes it to [artifact.cafe](https://artifact.cafe) and hands you a link. Reviewers comment without an account; when the architecture changes, the agent publishes the next version. Each comment stays with the version it was made on, and one whose anchor no longer matches is marked outdated, never lost.
-
-Need a static image? Every diagram also renders to light and dark PNGs for Slack, slides and READMEs.
-
-## Gallery
+- **One path to follow.** The request path is amber and numbered, with a plain-language step list under the diagram.
+- **Flows you can switch.** Request path, nightly sync, deploy: each tab lights up its own edges and dims the rest.
+- **An inspector for every part.** Hover to see what a component talks to; click for its role, notes and links.
+- **No pixel math.** The agent writes a short [`blueprint.json`](skills/blueprint/references/spec.md); the build lays it out, routes every edge and flags any overlap before you see it.
 
 <table>
   <tr>
@@ -88,14 +45,14 @@ Need a static image? Every diagram also renders to light and dark PNGs for Slack
         <source media="(prefers-color-scheme: dark)" srcset="docs/ai-dark.png">
         <img src="docs/ai.png" alt="AI app: a user asks Next.js on Vercel, which runs a vector search on Supabase and sends a prompt to Claude; Inngest syncs Notion every night and writes embeddings to Supabase" width="100%">
       </picture>
-      <p><b>AI apps</b><br><sub>Docs chatbot: Next.js, Supabase pgvector, Claude, and a nightly Notion sync on Inngest.</sub></p>
+      <p><b>AI apps</b><br><sub>Next.js, Supabase pgvector, Claude and a nightly Notion sync.</sub></p>
     </td>
     <td width="50%" valign="top">
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="docs/aws-dark.png">
         <img src="docs/aws.png" alt="AWS: CloudFront in front of S3 and an ALB in a public subnet; Fargate, RDS and ElastiCache in a private subnet of a VPC" width="100%">
       </picture>
-      <p><b>AWS, with AWS's own icons</b><br><sub>Subnets, VPC and service icons drawn the way AWS draws them.</sub></p>
+      <p><b>AWS</b><br><sub>Subnets, VPC and service icons drawn the way AWS draws them.</sub></p>
     </td>
   </tr>
   <tr>
@@ -104,51 +61,78 @@ Need a static image? Every diagram also renders to light and dark PNGs for Slack
         <source media="(prefers-color-scheme: dark)" srcset="docs/gcp-dark.png">
         <img src="docs/gcp.png" alt="Google Cloud: a global load balancer in front of Cloud Storage and GKE; GKE, Cloud SQL and Memorystore in one region of a VPC" width="100%">
       </picture>
-      <p><b>Google Cloud, with Google's own icons</b><br><sub>Regions inside the VPC, global services outside it.</sub></p>
+      <p><b>Google Cloud</b><br><sub>Regions inside the VPC, global services outside it.</sub></p>
     </td>
     <td width="50%" valign="top">
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="docs/azure-dark.png">
         <img src="docs/azure.png" alt="Azure: Front Door in front of Blob Storage and App Service in Japan East; SQL Database and Managed Redis behind private endpoints in a virtual network" width="100%">
       </picture>
-      <p><b>Azure, with Microsoft's own icons</b><br><sub>Private endpoints in a VNet, full service names as Microsoft asks.</sub></p>
+      <p><b>Azure</b><br><sub>Private endpoints in a VNet, full service names as Microsoft asks.</sub></p>
     </td>
   </tr>
 </table>
 
-## Light and dark
+## blueprint-teardown
 
-Every diagram ships with both themes and follows the reader's system setting. Tiles stay light so each logo keeps its own colors, and group marks switch to the brand's dark-theme version.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/teardown-dark.png">
+  <img src="docs/teardown.png" alt="A CoWoS-style package exploded into nine labelled parts, from BGA solder balls to the copper lid, in the interactive viewer with its toolbar" width="100%">
+</picture>
+
+- **Exploded and assembled,** with a smooth transition between them and every part labelled.
+- **Parametric.** Sliders for what people argue about, such as HBM stacks per side or DRAM layers; every dependent size follows.
+- **Ready for the deck.** Download SVG, PNG or PDF, or render a demo film from the same model.
+
+The CoWoS example in [`examples/cowos`](examples/cowos) is a concept with invented dimensions.
+
+## Review on artifact.cafe
+
+Both skills produce one self-contained HTML file. Your agent publishes it to [artifact.cafe](https://artifact.cafe) and hands you a link. Reviewers click any part, label or text and leave a note, without an account. When the design changes, the agent publishes the next version and replies to each thread.
+
+<img src="docs/review.png" alt="Three guest comments on the checkout diagram: amber pins on Neon, the webhook label and Clerk, beside the comment list showing each thread with its target" width="100%">
+
+## More
+
+<details>
+<summary><b>Light and dark</b></summary>
+<br>
+
+Every diagram ships both themes and follows the reader's system setting. Tiles stay light so each logo keeps its own colors.
 
 <img src="docs/light-dark.png" alt="The docs chatbot diagram cut diagonally: light theme on the upper left, dark theme on the lower right" width="100%">
+</details>
 
-## Also in this repo: blueprint-teardown
-
-For physical things, a second skill draws exploded views instead of flow diagrams: chip packages, boards, devices, or a concept drawn as stacked plates. One parametric model gives a page with assembled and exploded views, part labels, sliders and SVG, PNG and PDF downloads, reviewed on artifact.cafe like a blueprint diagram.
-
-<img src="docs/teardown.png" alt="A CoWoS-style package exploded into nine labelled parts, from BGA balls to the copper lid, with an agent session on the left and three reviewer comments pinned to the HBM stacks, the thermal interface material and the interposer" width="100%">
-
-```bash
-npx skills add smilewilson1999/blueprint --skill blueprint-teardown
-```
-
-The CoWoS example in [`examples/cowos`](examples/cowos) is a concept with invented dimensions. Its `film/` folder renders the demo video above from the same model.
-
-## Official logos, never redrawn
+<details>
+<summary><b>Official logos, never redrawn</b></summary>
+<br>
 
 Logos come from [svgl](https://svgl.app), [devicon](https://devicon.dev), [gilbarbara/logos](https://github.com/gilbarbara/logos) or the brand's own repository, and from each vendor's own package for [AWS](https://aws.amazon.com/architecture/icons/), [Google Cloud](https://cloud.google.com/icons) and [Azure](https://learn.microsoft.com/en-us/azure/architecture/icons/). Concepts like a queue or a cron job get a [Lucide](https://lucide.dev) pictogram. A logo is never recolored: if it would vanish on a light tile, it goes on a dark one.
+</details>
 
-## Try an example
+<details>
+<summary><b>Run the examples</b></summary>
+<br>
+
+blueprint needs Python 3.9+ and network access for the logos:
 
 ```bash
 cd examples/saas
 python3 ../../skills/blueprint/scripts/fetch_icons.py icons vercel nextjs hono neon clerk stripe github "actions:githubactions"
 cp ../../skills/blueprint/assets/generic/user.svg icons/
 python3 ../../skills/blueprint/scripts/blueprint.py blueprint.json icons index.html
-open index.html
 ```
 
-Requires Python 3.9+ and network access for the logos. PNG export uses Playwright with Chromium. The full spec format is in [`references/spec.md`](skills/blueprint/references/spec.md).
+blueprint-teardown needs Node 22+:
+
+```bash
+cd examples/cowos
+npm install && npm run build    # dist/index.html
+npm run film                    # optional demo video; needs Python Playwright and ffmpeg
+```
+
+PNG export and proofs use Playwright with Chromium.
+</details>
 
 ## Credits and licenses
 

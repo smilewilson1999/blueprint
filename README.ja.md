@@ -5,7 +5,7 @@
 
 <div align="center">
 
-技術スタックを一文で伝えるだけ。エージェントが公式ロゴと一本の明快なリクエスト経路で図を描き、<br>レビュアーがそのままコメントできるインタラクティブなページに仕上げます。
+作っているものを一文で伝えるだけ。エージェントがインタラクティブなページに描き、<br>チームは artifact.cafe でそのままレビューできます。アカウントは不要です。
 
 [![Release](https://img.shields.io/github/v/release/smilewilson1999/blueprint?color=B25F28&labelColor=2B2622)](https://github.com/smilewilson1999/blueprint/releases/latest) [![License](https://img.shields.io/github/license/smilewilson1999/blueprint?color=B25F28&labelColor=2B2622)](LICENSE) [![Agent skill](https://img.shields.io/badge/agent-skill-B25F28?labelColor=2B2622)](https://agentskills.io) [![Review on artifact.cafe](https://img.shields.io/badge/review-artifact.cafe-B25F28?labelColor=2B2622)](https://artifact.cafe)
 
@@ -13,142 +13,126 @@
 
 </div>
 
-<p align="center"><sub><i>「うちのスタックを図にして。Next.js と Hono の API を Vercel で、Postgres は Neon、認証は Clerk、決済は Stripe。デプロイは GitHub Actions。」</i></sub></p>
+## 二つの skill
 
-## インストール
+| Skill | 描くもの |
+| --- | --- |
+| **blueprint** | ソフトウェア構成：サービス、リクエスト経路、クラウドインフラ |
+| **blueprint-teardown** | 物理的なものの分解図：チップパッケージ、基板、デバイス |
 
 ```bash
 npx skills add smilewilson1999/blueprint --skill blueprint
+npx skills add smilewilson1999/blueprint --skill blueprint-teardown
 ```
 
-Claude Code、Codex、Cursor など、[skills に対応したエージェント](https://agentskills.io)で使えます。あとは図を頼むだけです。
+Claude Code、Codex、Cursor など、[skills に対応したエージェント](https://agentskills.io)で使えます。Claude アプリでは [Releases](https://github.com/smilewilson1999/blueprint/releases/latest) から該当する zip をアップロードしてください。あとはこう頼むだけです：
 
-Claude アプリでは、[Releases](https://github.com/smilewilson1999/blueprint/releases/latest) から `blueprint.zip` をダウンロードし、skill としてアップロードしてください。
+> *「うちのスタックを図にして。Next.js と Hono の API を Vercel で、Postgres は Neon、認証は Clerk、決済は Stripe。」*
 
-## 画像ではなく、ページです
+## blueprint
 
 <img src="docs/demo.webp" alt="デモ：コンポーネントにカーソルを合わせると接続先が光り、Request path タブで経路以外が薄くなり、Hono をクリックするとインスペクタが開き、テーマがダークに切り替わる" width="100%">
 
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>たどるべき経路は一本</h3>
-      リクエスト経路はアンバーで番号付き。図の下に平易なステップ一覧が並び、ほかの要素は一歩下がります。
-    </td>
-    <td width="50%" valign="top">
-      <h3>フローを切り替えられる</h3>
-      リクエスト経路、夜間同期、デプロイ。フローごとのタブを選ぶと、その線だけが光りほかは薄くなります。
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>すべての部品にインスペクタ</h3>
-      カーソルを合わせると接続先が、クリックすると役割、採用の理由、リポジトリへのリンクが表示されます。
-    </td>
-    <td width="50%" valign="top">
-      <h3>コメントされる前提で設計</h3>
-      名前、役割、ラベルは固定 id を持つ実テキスト。図を直したあとも、コメントの位置を見つけ直せます。
-    </td>
-  </tr>
-</table>
-
-## どこにでもコメント
-
-レビュアーはコンポーネント、線のラベル、あらゆるテキストをクリックしてコメントできます。アカウントもログインも不要です。コメントは対象の場所に留まり、一覧にまとめて表示されます。
-
-<img src="docs/review.png" alt="チェックアウト構成図へのゲストコメント3件：Neon、webhook ラベル、Clerk にアンバーのピンが付き、横のコメント一覧に各スレッドと対象が表示されている" width="100%">
-
-## 仕組み
-
-**1. エージェントがシステムを記述する。** 座標もピクセル計算も不要です。ノードはグリッドに置き、グループはメンバーを列挙し、線は両端を指定するだけ。
-
-```json
-{
-  "groups": [{ "id": "vercel", "label": "Vercel", "icon": "vercel", "contains": ["next", "hono"] }],
-  "nodes": [
-    { "id": "next", "name": "Next.js", "role": "frontend", "icon": "nextjs", "at": [1, 0] },
-    { "id": "hono", "name": "Hono", "role": "api routes", "icon": "hono", "at": [2, 0] }
-  ],
-  "edges": [{ "from": "next", "to": "hono", "label": "RPC", "kind": "primary", "step": 2 }]
-}
-```
-
-**2. 描画はビルドに任せる。** メンバーからグループの大きさを決め、ノードやラベルを避けて線を引き、双方向の線にはそれぞれのレーンを割り当てます。重なりを見つけるとすべて報告するので、あなたが見る前にエージェントが直します。
-
-**3. artifact.cafe でレビューする。** できあがるのは自己完結した HTML ファイル一つ。エージェントが [artifact.cafe](https://artifact.cafe) に公開してリンクを渡します。レビュアーはアカウントなしでコメントでき、構成が変われば新しい版が公開されます。コメントは書かれた版に残り、新しい版で位置が一致しないものは outdated と表示されますが、消えることはありません。
-
-静止画が必要なときは、ライトとダークの PNG も書き出せます。Slack、スライド、README にどうぞ。
-
-## ギャラリー
+- **たどるべき経路は一本。** リクエスト経路はアンバーで番号付き、図の下に平易なステップ一覧が並びます。
+- **フローを切り替えられる。** リクエスト経路、夜間同期、デプロイ。タブを選ぶとその線だけが光り、ほかは薄くなります。
+- **すべての部品にインスペクタ。** カーソルで接続先を、クリックで役割・メモ・リンクを表示します。
+- **座標計算は不要。** エージェントは短い [`blueprint.json`](skills/blueprint/references/spec.md) を書くだけ。ビルドがレイアウトと配線を行い、重なりはあなたが見る前にすべて検出します。
 
 <table>
   <tr>
     <td width="50%" valign="top">
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="docs/ai-dark.png">
-        <img src="docs/ai.png" alt="AI アプリ：ユーザーが Vercel 上の Next.js に質問し、Next.js が Supabase でベクトル検索して Claude にプロンプトを送る。Inngest が毎晩 Notion を同期し、埋め込みを Supabase に書き込む" width="100%">
+        <img src="docs/ai.png" alt="AI app: a user asks Next.js on Vercel, which runs a vector search on Supabase and sends a prompt to Claude; Inngest syncs Notion every night and writes embeddings to Supabase" width="100%">
       </picture>
-      <p><b>AI アプリ</b><br><sub>ドキュメント Q&amp;A ボット：Next.js、Supabase pgvector、Claude、Inngest による Notion の夜間同期。</sub></p>
+      <p><b>AI アプリ</b><br><sub>Next.js、Supabase pgvector、Claude と Notion の夜間同期。</sub></p>
     </td>
     <td width="50%" valign="top">
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="docs/aws-dark.png">
-        <img src="docs/aws.png" alt="AWS：CloudFront が S3 と public subnet の ALB の前段にあり、Fargate、RDS、ElastiCache は VPC の private subnet にある" width="100%">
+        <img src="docs/aws.png" alt="AWS: CloudFront in front of S3 and an ALB in a public subnet; Fargate, RDS and ElastiCache in a private subnet of a VPC" width="100%">
       </picture>
-      <p><b>AWS は AWS 公式アイコンで</b><br><sub>サブネット、VPC、サービスアイコンを AWS 自身の描き方で。</sub></p>
+      <p><b>AWS</b><br><sub>サブネット、VPC、サービスアイコンを AWS 自身の描き方で。</sub></p>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="docs/gcp-dark.png">
-        <img src="docs/gcp.png" alt="Google Cloud：グローバルロードバランサが Cloud Storage と GKE の前段にあり、GKE、Cloud SQL、Memorystore は VPC 内の一つのリージョンにある" width="100%">
+        <img src="docs/gcp.png" alt="Google Cloud: a global load balancer in front of Cloud Storage and GKE; GKE, Cloud SQL and Memorystore in one region of a VPC" width="100%">
       </picture>
-      <p><b>Google Cloud は Google 公式アイコンで</b><br><sub>リージョンは VPC の中に、グローバルなサービスはその外に。</sub></p>
+      <p><b>Google Cloud</b><br><sub>リージョンは VPC の中に、グローバルなサービスはその外に。</sub></p>
     </td>
     <td width="50%" valign="top">
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="docs/azure-dark.png">
-        <img src="docs/azure.png" alt="Azure：Front Door が Blob Storage と Japan East の App Service の前段にあり、SQL Database と Managed Redis は仮想ネットワーク内の private endpoint 経由で接続される" width="100%">
+        <img src="docs/azure.png" alt="Azure: Front Door in front of Blob Storage and App Service in Japan East; SQL Database and Managed Redis behind private endpoints in a virtual network" width="100%">
       </picture>
-      <p><b>Azure は Microsoft 公式アイコンで</b><br><sub>VNet 内の private endpoint。サービス名は Microsoft の求めるとおり正式名称で。</sub></p>
+      <p><b>Azure</b><br><sub>VNet 内の private endpoint。サービス名は Microsoft の求めるとおり正式名称で。</sub></p>
     </td>
   </tr>
 </table>
 
-## ライトとダーク
+## blueprint-teardown
 
-どの図もライトとダークの両方のテーマを持ち、読み手のシステム設定に合わせて切り替わります。タイルは明るいままなので各ロゴは本来の色を保ち、グループ見出しのロゴはブランドのダーク版に切り替わります。
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/teardown-dark.png">
+  <img src="docs/teardown.png" alt="CoWoS 型パッケージを BGA ボールから銅製リッドまで九つのラベル付き部品に分解した図。ツールバー付きのインタラクティブなビューアに表示されている" width="100%">
+</picture>
+
+- **分解図と組立図、** その間をなめらかに切り替え、すべての部品にラベルが付きます。
+- **パラメトリック。** 議論になる値はスライダーに。片側の HBM スタック数や DRAM 層数を変えると、関連する寸法がすべて追従します。
+- **そのまま資料に。** SVG・PNG・PDF をダウンロードでき、同じモデルからデモ動画も書き出せます。
+
+[`examples/cowos`](examples/cowos) の CoWoS の例は寸法を創作したコンセプト図です。
+
+## artifact.cafe でレビュー
+
+どちらの skill も自己完結した HTML ファイルを一つ作ります。エージェントが [artifact.cafe](https://artifact.cafe) に公開してリンクを渡し、レビュアーはアカウントなしで、部品・ラベル・テキストのどこにでもコメントできます。設計が変われば、エージェントが新しい版を公開し、各スレッドに返信します。
+
+<img src="docs/review.png" alt="チェックアウト構成図へのゲストコメント3件：Neon、webhook ラベル、Clerk にアンバーのピンが付き、横のコメント一覧に各スレッドと対象が表示されている" width="100%">
+
+## その他
+
+<details>
+<summary><b>ライトとダーク</b></summary>
+<br>
+
+どの図もライトとダークの両方のテーマを持ち、読み手のシステム設定に合わせて切り替わります。タイルは明るいままなので、各ロゴは本来の色を保ちます。
 
 <img src="docs/light-dark.png" alt="ドキュメント Q&A ボットの図を対角線で分割：左上がライトテーマ、右下がダークテーマ" width="100%">
+</details>
 
-## このリポジトリにもう一つ：blueprint-teardown
+<details>
+<summary><b>公式ロゴだけ、描き直さない</b></summary>
+<br>
 
-物理的なものには、フロー図ではなく分解図を描く二つ目の skill があります。チップパッケージ、基板、デバイス、あるいは積み重ねた板として描く概念です。一つのパラメトリックモデルから、組み立てと分解の切り替え、部品ラベル、スライダー、SVG・PNG・PDF のダウンロードを備えたページができ、blueprint の図と同じように artifact.cafe でレビューできます。
+ロゴは [svgl](https://svgl.app)、[devicon](https://devicon.dev)、[gilbarbara/logos](https://github.com/gilbarbara/logos)、またはブランド自身のリポジトリから取得し、[AWS](https://aws.amazon.com/architecture/icons/)、[Google Cloud](https://cloud.google.com/icons)、[Azure](https://learn.microsoft.com/en-us/azure/architecture/icons/) は各社公式のアイコンパッケージを使います。キューや cron のような概念には [Lucide](https://lucide.dev) のピクトグラムを。ロゴの色は変えません。明るいタイルで見えなくなるなら、暗いタイルに載せます。
+</details>
 
-<img src="docs/teardown.png" alt="CoWoS 型パッケージを BGA ボールから銅製リッドまで九つのラベル付き部品に分解した図。左にエージェントの操作、右に HBM スタック、熱伝導材、インターポーザへのレビューコメント三件" width="100%">
+<details>
+<summary><b>サンプルを動かす</b></summary>
+<br>
 
-```bash
-npx skills add smilewilson1999/blueprint --skill blueprint-teardown
-```
-
-[`examples/cowos`](examples/cowos) の CoWoS の例は寸法を創作したコンセプト図です。その `film/` フォルダが、同じモデルから上のデモ動画を書き出します。
-
-## 公式ロゴだけ、描き直さない
-
-ロゴは [svgl](https://svgl.app)、[devicon](https://devicon.dev)、[gilbarbara/logos](https://github.com/gilbarbara/logos)、またはブランド自身のリポジトリから取得し、[AWS](https://aws.amazon.com/architecture/icons/)、[Google Cloud](https://cloud.google.com/icons)、[Azure](https://learn.microsoft.com/en-us/azure/architecture/icons/) は各社公式のアイコンパッケージを使います。キューや cron のような概念には [Lucide](https://lucide.dev) のピクトグラムを。ロゴの色は決して変えません。明るいタイルで見えなくなるなら、暗いタイルに載せます。
-
-## サンプルを動かす
+blueprint には Python 3.9 以上と、ロゴ取得のためのネットワーク接続が必要です：
 
 ```bash
 cd examples/saas
 python3 ../../skills/blueprint/scripts/fetch_icons.py icons vercel nextjs hono neon clerk stripe github "actions:githubactions"
 cp ../../skills/blueprint/assets/generic/user.svg icons/
 python3 ../../skills/blueprint/scripts/blueprint.py blueprint.json icons index.html
-open index.html
 ```
 
-Python 3.9 以上と、ロゴ取得のためのネットワーク接続が必要です。PNG の書き出しには Playwright と Chromium を使います。spec の形式は [`references/spec.md`](skills/blueprint/references/spec.md) にあります。
+blueprint-teardown には Node 22 以上が必要です：
+
+```bash
+cd examples/cowos
+npm install && npm run build    # dist/index.html
+npm run film                    # 任意：デモ動画。Python Playwright と ffmpeg が必要
+```
+
+PNG の書き出しと proof には Playwright と Chromium を使います。
+</details>
 
 ## クレジットとライセンス
 
