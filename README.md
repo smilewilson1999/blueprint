@@ -18,7 +18,7 @@ Describe your stack in a sentence. Your agent draws it with official logos, one 
 ## Install
 
 ```bash
-npx skills add smilewilson1999/blueprint
+npx skills add smilewilson1999/blueprint --skill blueprint
 ```
 
 Works with Claude Code, Codex, Cursor and [any agent that supports skills](https://agentskills.io). Then just ask for a diagram.
@@ -122,6 +122,18 @@ Every diagram ships with both themes and follows the reader's system setting. Ti
 
 <img src="docs/light-dark.png" alt="The docs chatbot diagram cut diagonally: light theme on the upper left, dark theme on the lower right" width="100%">
 
+## Also in this repo: blueprint-teardown
+
+For physical things, a second skill draws exploded views instead of flow diagrams: chip packages, boards, devices, or a concept drawn as stacked plates. One parametric model gives a page with assembled and exploded views, part labels, sliders and SVG, PNG and PDF downloads, reviewed on artifact.cafe like a blueprint diagram.
+
+<img src="docs/teardown.png" alt="A CoWoS-style package exploded into nine labelled parts, from BGA balls to the copper lid, with an agent session on the left and three reviewer comments pinned to the HBM stacks, the thermal interface material and the interposer" width="100%">
+
+```bash
+npx skills add smilewilson1999/blueprint --skill blueprint-teardown
+```
+
+The CoWoS example in [`examples/cowos`](examples/cowos) is a concept with invented dimensions. Its `film/` folder renders the demo video above from the same model.
+
 ## Official logos, never redrawn
 
 Logos come from [svgl](https://svgl.app), [devicon](https://devicon.dev), [gilbarbara/logos](https://github.com/gilbarbara/logos) or the brand's own repository, and from each vendor's own package for [AWS](https://aws.amazon.com/architecture/icons/), [Google Cloud](https://cloud.google.com/icons) and [Azure](https://learn.microsoft.com/en-us/azure/architecture/icons/). Concepts like a queue or a cron job get a [Lucide](https://lucide.dev) pictogram. A logo is never recolored: if it would vanish on a light tile, it goes on a dark one.
@@ -140,8 +152,9 @@ Requires Python 3.9+ and network access for the logos. PNG export uses Playwrigh
 
 ## Credits and licenses
 
-blueprint started as a fork of [stack-diagram](https://github.com/caru-ini/stack-diagram) by caru-ini, whose icon pipeline and vendor rules it keeps.
+blueprint started as a fork of [stack-diagram](https://github.com/caru-ini/stack-diagram) by caru-ini, whose icon pipeline and vendor rules it keeps. blueprint-teardown draws with [teardown](https://github.com/jakubkrehel/skills/tree/main/skills/teardown) by Jakub Krehel; its changes are listed in [`engine/PATCHES.md`](skills/blueprint-teardown/engine/PATCHES.md).
 
 - Code and docs: MIT, see [`LICENSE`](LICENSE).
+- The teardown engine in `skills/blueprint-teardown/engine/`: MIT, Copyright (c) 2026 Jakub Krehel, see [`engine/LICENSE`](skills/blueprint-teardown/engine/LICENSE).
 - Bundled fonts (Inter, IBM Plex Mono): SIL Open Font License 1.1, see [`assets/fonts`](skills/blueprint/assets/fonts).
 - Logos are **not** bundled. They are downloaded at build time from the sources above. The images in `docs/` show third-party logos. All brand names and logos are trademarks of their respective owners; their use in a diagram does not imply endorsement.

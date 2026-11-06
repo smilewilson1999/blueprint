@@ -18,7 +18,7 @@
 ## インストール
 
 ```bash
-npx skills add smilewilson1999/blueprint
+npx skills add smilewilson1999/blueprint --skill blueprint
 ```
 
 Claude Code、Codex、Cursor など、[skills に対応したエージェント](https://agentskills.io)で使えます。あとは図を頼むだけです。
@@ -122,6 +122,18 @@ Claude アプリでは、[Releases](https://github.com/smilewilson1999/blueprint
 
 <img src="docs/light-dark.png" alt="ドキュメント Q&A ボットの図を対角線で分割：左上がライトテーマ、右下がダークテーマ" width="100%">
 
+## このリポジトリにもう一つ：blueprint-teardown
+
+物理的なものには、フロー図ではなく分解図を描く二つ目の skill があります。チップパッケージ、基板、デバイス、あるいは積み重ねた板として描く概念です。一つのパラメトリックモデルから、組み立てと分解の切り替え、部品ラベル、スライダー、SVG・PNG・PDF のダウンロードを備えたページができ、blueprint の図と同じように artifact.cafe でレビューできます。
+
+<img src="docs/teardown.png" alt="CoWoS 型パッケージを BGA ボールから銅製リッドまで九つのラベル付き部品に分解した図。左にエージェントの操作、右に HBM スタック、熱伝導材、インターポーザへのレビューコメント三件" width="100%">
+
+```bash
+npx skills add smilewilson1999/blueprint --skill blueprint-teardown
+```
+
+[`examples/cowos`](examples/cowos) の CoWoS の例は寸法を創作したコンセプト図です。その `film/` フォルダが、同じモデルから上のデモ動画を書き出します。
+
 ## 公式ロゴだけ、描き直さない
 
 ロゴは [svgl](https://svgl.app)、[devicon](https://devicon.dev)、[gilbarbara/logos](https://github.com/gilbarbara/logos)、またはブランド自身のリポジトリから取得し、[AWS](https://aws.amazon.com/architecture/icons/)、[Google Cloud](https://cloud.google.com/icons)、[Azure](https://learn.microsoft.com/en-us/azure/architecture/icons/) は各社公式のアイコンパッケージを使います。キューや cron のような概念には [Lucide](https://lucide.dev) のピクトグラムを。ロゴの色は決して変えません。明るいタイルで見えなくなるなら、暗いタイルに載せます。
@@ -140,8 +152,9 @@ Python 3.9 以上と、ロゴ取得のためのネットワーク接続が必要
 
 ## クレジットとライセンス
 
-blueprint は caru-ini による [stack-diagram](https://github.com/caru-ini/stack-diagram) のフォークとして始まり、そのアイコン取得の仕組みとクラウドベンダーごとの描画ルールを引き継いでいます。
+blueprint は caru-ini による [stack-diagram](https://github.com/caru-ini/stack-diagram) のフォークとして始まり、そのアイコン取得の仕組みとクラウドベンダーごとの描画ルールを引き継いでいます。blueprint-teardown の描画エンジンは Jakub Krehel による [teardown](https://github.com/jakubkrehel/skills/tree/main/skills/teardown) で、加えた変更は [`engine/PATCHES.md`](skills/blueprint-teardown/engine/PATCHES.md) にあります。
 
 - コードとドキュメント：MIT。[`LICENSE`](LICENSE) を参照。
+- `skills/blueprint-teardown/engine/` の teardown エンジン：MIT、Copyright (c) 2026 Jakub Krehel。[`engine/LICENSE`](skills/blueprint-teardown/engine/LICENSE) を参照。
 - 同梱フォント（Inter、IBM Plex Mono）：SIL Open Font License 1.1。[`assets/fonts`](skills/blueprint/assets/fonts) を参照。
 - ロゴは同梱して**いません**。ビルド時に上記の提供元からダウンロードします。`docs/` の画像には第三者のロゴが含まれます。ブランド名とロゴはすべて各所有者の商標であり、図での使用は推奨や提携を意味しません。
