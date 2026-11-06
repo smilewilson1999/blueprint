@@ -13,12 +13,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # Claude apps expect blueprint/SKILL.md at the top of the zip
-      - name: Package skill
+      # Claude apps expect <skill>/SKILL.md at the top of each zip, one zip per skill
+      - name: Package skills
         working-directory: skills
-        run: zip -r ../blueprint.zip blueprint
+        run: for skill in */; do zip -r "../${skill%/}.zip" "${skill%/}"; done
 
       - name: Create release
-        run: gh release create "$GITHUB_REF_NAME" blueprint.zip --generate-notes
+        run: gh release create "$GITHUB_REF_NAME" *.zip --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}
