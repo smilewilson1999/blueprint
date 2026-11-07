@@ -29,6 +29,8 @@ npx skills add smilewilson1999/blueprint --skill blueprint-teardown
 
 > *「幫我畫我們的架構：Next.js 和 Hono API 跑在 Vercel，Postgres 用 Neon，登入用 Clerk，金流用 Stripe。」*
 
+**直接試試看：**[結帳架構圖](https://artifact.cafe/a/acme-checkout-platform-vb1hn0) · [CoWoS 拆解圖](https://artifact.cafe/a/cowos-package-teardown-9wbulc)。不用註冊，可以縮放、點部件、留言。
+
 ## blueprint
 
 <img src="docs/demo.webp" alt="示範：滑過元件會亮出它的連線；切到 Request path 分頁時，路徑以外的部分會變淡；點 Hono 會打開 inspector；最後切成暗色主題" width="100%">
@@ -36,6 +38,7 @@ npx skills add smilewilson1999/blueprint --skill blueprint-teardown
 - **一條路徑，一眼看懂。** 請求路徑用琥珀色標出並編號，圖下方附白話的步驟說明。
 - **可以切換的流程。** 請求路徑、夜間同步、部署，每個分頁只亮出自己的線，其餘變淡。
 - **每個元件都能點開看。** 滑過去看它跟誰相連，點下去看它的角色、說明和連結。
+- **像設計軟體一樣縮放。** 滾輪往上放大、往下縮小，以游標為中心；拖曳空白處可以平移。手機上用兩指縮放。
 - **不用算座標。** agent 只寫一份簡短的 [`blueprint.json`](skills/blueprint/references/spec.md)，build 負責排版、繞線，還會在你看到之前先抓出所有重疊。
 
 ## 範例

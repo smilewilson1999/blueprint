@@ -29,6 +29,8 @@ They work with Claude Code, Codex, Cursor and [any agent that supports skills](h
 
 > *"Diagram our stack: Next.js and a Hono API on Vercel, Postgres on Neon, auth with Clerk, payments with Stripe."*
 
+**Try them live:** [checkout architecture](https://artifact.cafe/a/acme-checkout-platform-vb1hn0) · [CoWoS teardown](https://artifact.cafe/a/cowos-package-teardown-9wbulc). No account needed: zoom, click a part, leave a comment.
+
 ## blueprint
 
 <img src="docs/demo.webp" alt="Demo: hovering a component lights up what it talks to, the Request path tab dims everything off the path, clicking Hono opens the inspector, and the theme switches to dark" width="100%">
@@ -36,6 +38,7 @@ They work with Claude Code, Codex, Cursor and [any agent that supports skills](h
 - **One path to follow.** The request path is amber and numbered, with a plain-language step list under the diagram.
 - **Flows you can switch.** Request path, nightly sync, deploy: each tab lights up its own edges and dims the rest.
 - **An inspector for every part.** Hover to see what a component talks to; click for its role, notes and links.
+- **Zoom like a design canvas.** Scroll up to zoom in and down to zoom out, around the pointer; drag to pan. On a phone, pinch with two fingers.
 - **No pixel math.** The agent writes a short [`blueprint.json`](skills/blueprint/references/spec.md); the build lays it out, routes every edge and flags any overlap before you see it.
 
 ## Gallery

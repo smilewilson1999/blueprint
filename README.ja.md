@@ -29,6 +29,8 @@ Claude Code、Codex、Cursor など、[skills に対応したエージェント]
 
 > *「うちのスタックを図にして。Next.js と Hono の API を Vercel で、Postgres は Neon、認証は Clerk、決済は Stripe。」*
 
+**そのまま試せます：**[チェックアウト構成図](https://artifact.cafe/a/acme-checkout-platform-vb1hn0) · [CoWoS 分解図](https://artifact.cafe/a/cowos-package-teardown-9wbulc)。アカウント不要で、ズーム、部品のクリック、コメントができます。
+
 ## blueprint
 
 <img src="docs/demo.webp" alt="デモ：コンポーネントにカーソルを合わせると接続先が光り、Request path タブで経路以外が薄くなり、Hono をクリックするとインスペクタが開き、テーマがダークに切り替わる" width="100%">
@@ -36,6 +38,7 @@ Claude Code、Codex、Cursor など、[skills に対応したエージェント]
 - **たどるべき経路は一本。** リクエスト経路はアンバーで番号付き、図の下に平易なステップ一覧が並びます。
 - **フローを切り替えられる。** リクエスト経路、夜間同期、デプロイ。タブを選ぶとその線だけが光り、ほかは薄くなります。
 - **すべての部品にインスペクタ。** カーソルで接続先を、クリックで役割・メモ・リンクを表示します。
+- **デザインツールのようにズーム。** ホイールを上でズームイン、下でズームアウト、カーソルを中心に。空白をドラッグで移動。スマートフォンでは二本指でピンチ。
 - **座標計算は不要。** エージェントは短い [`blueprint.json`](skills/blueprint/references/spec.md) を書くだけ。ビルドがレイアウトと配線を行い、重なりはあなたが見る前にすべて検出します。
 
 ## ギャラリー
