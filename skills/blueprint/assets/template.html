@@ -393,8 +393,8 @@ path.pulse { fill:none; stroke: var(--amber); stroke-width: 2.4; stroke-linecap:
   if (!model.flows.length) $('.seg').hidden = true;
   renderSteps();
 
-  // Zoom and pan, like a design canvas. Scrolling down zooms in and up zooms out, around the
-  // pointer; a trackpad pinch zooms the natural way. Drag empty canvas to pan; double-click,
+  // Zoom and pan, like a design canvas. Scrolling up zooms in and down zooms out, around the
+  // pointer, the way Figma zooms; a trackpad pinch zooms the same way. Drag empty canvas to pan; double-click,
   // the percentage or 0 fits it again. At either zoom limit the wheel scrolls the page instead.
   const view = $('#viewport'), W = canvas.offsetWidth, H = canvas.offsetHeight;
   let k = 1, tx = 0, ty = 0, fitK = 1, moved = false;
@@ -420,7 +420,7 @@ path.pulse { fill:none; stroke: var(--amber); stroke-width: 2.4; stroke-linecap:
   const center = () => [view.clientWidth / 2, view.clientHeight / 2];
   view.addEventListener('wheel', ev => {
     const r = view.getBoundingClientRect();
-    const d = clamp(ev.ctrlKey ? -ev.deltaY * 4 : ev.deltaY, -80, 80);
+    const d = clamp(-ev.deltaY * (ev.ctrlKey ? 4 : 1), -80, 80);
     if (zoomAt(Math.exp(d * .0025), ev.clientX - r.left, ev.clientY - r.top)) ev.preventDefault();
   }, {passive: false});
   let drag = null;
