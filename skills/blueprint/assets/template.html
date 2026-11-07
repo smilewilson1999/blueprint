@@ -96,12 +96,12 @@ h1 { font-weight: 600; font-size: clamp(24px, 3.4vw, 32px); letter-spacing: -0.0
 :focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
 /* canvas */
+/* the dot grid belongs to the viewport, not the drawing, so it fills the whole frame at any zoom */
 .scroller { position: relative; overflow: hidden; max-width: 100%; border: 1px solid var(--line); border-radius: 14px;
-  background: var(--canvas); touch-action: pan-y; }
+  background-color: var(--canvas); background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+  background-size: 22px 22px; background-position: 11px 11px; touch-action: pan-y; }
 .scroller.panning, .scroller.panning * { cursor: grabbing !important; }
-.canvas { position: relative; transform-origin: 0 0; background-color: var(--canvas);
-  background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
-  background-size: 22px 22px; background-position: 11px 11px; }
+.canvas { position: relative; transform-origin: 0 0; }
 
 /* zoom controls, bottom right of the canvas */
 .hud { position:absolute; right: 10px; bottom: 10px; z-index: 2; display:flex; align-items:center; gap: 2px; padding: 3px;
@@ -112,6 +112,11 @@ h1 { font-weight: 600; font-size: clamp(24px, 3.4vw, 32px); letter-spacing: -0.0
 .hud button:hover { background: var(--trim); color: var(--amber-ink); }
 .hud #zoom-level { min-width: 46px; }
 .hud svg { width: 14px; height: 14px; }
+@media (max-width: 600px) {
+  .hud { right: 6px; bottom: 6px; padding: 2px; }
+  .hud button { min-width: 22px; height: 22px; font-size: 11px; }
+  .hud #zoom-level { min-width: 38px; }
+}
 
 /* groups: top-level groups are small OS windows; nested ones are dashed zones */
 .group { position:absolute; border-radius: 12px; }
@@ -406,8 +411,10 @@ path.pulse { fill:none; stroke: var(--amber); stroke-width: 2.4; stroke-linecap:
   function fit() {
     const w = view.clientWidth;
     fitK = Math.min(1, w / W); k = fitK; moved = false;
-    view.style.height = Math.round(H * fitK) + 'px';
-    tx = (w - W * k) / 2; ty = 0;
+    // on a phone the fitted drawing is short, so give the canvas some height and center it
+    const h = Math.max(Math.round(H * fitK), Math.min(320, H));
+    view.style.height = h + 'px';
+    tx = (w - W * k) / 2; ty = (h - H * k) / 2;
     apply();
   }
   function zoomAt(factor, cx, cy) {
@@ -426,7 +433,8 @@ path.pulse { fill:none; stroke: var(--amber); stroke-width: 2.4; stroke-linecap:
   let drag = null;
   view.addEventListener('pointerdown', ev => {
     // nodes, edge labels and the controls keep their own clicks and text selection
-    if (ev.button !== 0 || ev.target.closest('.node, .chip, .hud, .g-bar, .g-label')) return;
+    // touch goes to the page (one finger) or to the pinch below (two fingers)
+    if (ev.pointerType === 'touch' || ev.button !== 0 || ev.target.closest('.node, .chip, .hud, .g-bar, .g-label')) return;
     drag = {x: ev.clientX - tx, y: ev.clientY - ty, id: ev.pointerId};
     view.setPointerCapture(ev.pointerId); view.classList.add('panning');
   });
@@ -447,6 +455,29 @@ path.pulse { fill:none; stroke: var(--amber); stroke-width: 2.4; stroke-linecap:
     else if (ev.key === '-') zoomAt(.8, ...center());
     else if (ev.key === '0') fit();
   });
+  // On a phone, like an embedded map: one finger scrolls the page, two fingers pinch to zoom
+  // and move together to pan, both around the point between them.
+  let pinch = null;
+  const mid = t => { const r = view.getBoundingClientRect();
+    return [(t[0].clientX + t[1].clientX) / 2 - r.left, (t[0].clientY + t[1].clientY) / 2 - r.top]; };
+  const gap = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+  view.addEventListener('touchstart', ev => {
+    if (ev.touches.length !== 2) return;
+    ev.preventDefault();
+    pinch = {d: gap(ev.touches), m: mid(ev.touches)};
+  }, {passive: false});
+  view.addEventListener('touchmove', ev => {
+    if (!pinch || ev.touches.length !== 2) return;
+    ev.preventDefault();
+    const d = gap(ev.touches), m = mid(ev.touches);
+    tx += m[0] - pinch.m[0]; ty += m[1] - pinch.m[1]; moved = true;
+    if (!zoomAt(d / pinch.d, m[0], m[1])) apply();
+    pinch = {d, m};
+  }, {passive: false});
+  view.addEventListener('touchend', ev => { if (ev.touches.length < 2) pinch = null; });
+  view.addEventListener('touchcancel', () => { pinch = null; });
+  // Safari zooms the whole page on a pinch unless its gesture events are stopped
+  view.addEventListener('gesturestart', ev => ev.preventDefault());
   addEventListener('resize', () => { if (!moved) fit(); });
   fit();
 })();
