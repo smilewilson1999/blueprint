@@ -96,10 +96,22 @@ h1 { font-weight: 600; font-size: clamp(24px, 3.4vw, 32px); letter-spacing: -0.0
 :focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
 /* canvas */
-.scroller { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--canvas); }
-.canvas { position: relative; background-color: var(--canvas);
+.scroller { position: relative; overflow: hidden; max-width: 100%; border: 1px solid var(--line); border-radius: 14px;
+  background: var(--canvas); touch-action: pan-y; }
+.scroller.panning, .scroller.panning * { cursor: grabbing !important; }
+.canvas { position: relative; transform-origin: 0 0; background-color: var(--canvas);
   background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
   background-size: 22px 22px; background-position: 11px 11px; }
+
+/* zoom controls, bottom right of the canvas */
+.hud { position:absolute; right: 10px; bottom: 10px; z-index: 2; display:flex; align-items:center; gap: 2px; padding: 3px;
+  border: 1px solid var(--line); border-radius: 9px; background: color-mix(in oklab, var(--surface) 92%, transparent);
+  box-shadow: 0 6px 18px -10px rgba(43,38,34,.25); }
+.hud button { display:grid; place-items:center; min-width: 26px; height: 26px; padding: 0 6px; border: 0; border-radius: 6px;
+  background: none; color: var(--ink-2); font: 500 12px/1 var(--font-mono); cursor: pointer; }
+.hud button:hover { background: var(--trim); color: var(--amber-ink); }
+.hud #zoom-level { min-width: 46px; }
+.hud svg { width: 14px; height: 14px; }
 
 /* groups: top-level groups are small OS windows; nested ones are dashed zones */
 .group { position:absolute; border-radius: 12px; }
@@ -258,7 +270,12 @@ path.pulse { fill:none; stroke: var(--amber); stroke-width: 2.4; stroke-linecap:
     </button>
   </div>
 
-  <div class="scroller">
+  <div class="scroller" id="viewport" style="width:calc({{W}}px + 2px)">
+    <div class="hud" role="group" aria-label="Zoom">
+      <button type="button" id="zoom-out" aria-label="Zoom out">&minus;</button>
+      <button type="button" id="zoom-level" aria-label="Fit to view" title="Fit to view (0)">100%</button>
+      <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
+    </div>
     <div class="canvas" id="canvas" style="width:{{W}}px;height:{{H}}px">
 {{GROUPS}}
       <svg class="edges" width="{{W}}" height="{{H}}" viewBox="0 0 {{W}} {{H}}" aria-hidden="true">
@@ -375,6 +392,63 @@ path.pulse { fill:none; stroke: var(--amber); stroke-width: 2.4; stroke-linecap:
   $('#theme').addEventListener('click', () => { root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark'; });
   if (!model.flows.length) $('.seg').hidden = true;
   renderSteps();
+
+  // Zoom and pan, like a design canvas. Scrolling down zooms in and up zooms out, around the
+  // pointer; a trackpad pinch zooms the natural way. Drag empty canvas to pan; double-click,
+  // the percentage or 0 fits it again. At either zoom limit the wheel scrolls the page instead.
+  const view = $('#viewport'), W = canvas.offsetWidth, H = canvas.offsetHeight;
+  let k = 1, tx = 0, ty = 0, fitK = 1, moved = false;
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  function apply() {
+    canvas.style.transform = `translate(${tx}px, ${ty}px) scale(${k})`;
+    $('#zoom-level').textContent = Math.round(k * 100) + '%';
+  }
+  function fit() {
+    const w = view.clientWidth;
+    fitK = Math.min(1, w / W); k = fitK; moved = false;
+    view.style.height = Math.round(H * fitK) + 'px';
+    tx = (w - W * k) / 2; ty = 0;
+    apply();
+  }
+  function zoomAt(factor, cx, cy) {
+    const nk = clamp(k * factor, fitK * .5, 4);
+    if (Math.abs(nk - k) < 1e-4) return false;
+    tx = cx - (cx - tx) * nk / k; ty = cy - (cy - ty) * nk / k; k = nk; moved = true;
+    apply();
+    return true;
+  }
+  const center = () => [view.clientWidth / 2, view.clientHeight / 2];
+  view.addEventListener('wheel', ev => {
+    const r = view.getBoundingClientRect();
+    const d = clamp(ev.ctrlKey ? -ev.deltaY * 4 : ev.deltaY, -80, 80);
+    if (zoomAt(Math.exp(d * .0025), ev.clientX - r.left, ev.clientY - r.top)) ev.preventDefault();
+  }, {passive: false});
+  let drag = null;
+  view.addEventListener('pointerdown', ev => {
+    // nodes, edge labels and the controls keep their own clicks and text selection
+    if (ev.button !== 0 || ev.target.closest('.node, .chip, .hud, .g-bar, .g-label')) return;
+    drag = {x: ev.clientX - tx, y: ev.clientY - ty, id: ev.pointerId};
+    view.setPointerCapture(ev.pointerId); view.classList.add('panning');
+  });
+  view.addEventListener('pointermove', ev => {
+    if (!drag) return;
+    tx = ev.clientX - drag.x; ty = ev.clientY - drag.y; moved = true; apply();
+  });
+  const endDrag = () => { if (drag) { view.releasePointerCapture(drag.id); drag = null; view.classList.remove('panning'); } };
+  view.addEventListener('pointerup', endDrag);
+  view.addEventListener('pointercancel', endDrag);
+  view.addEventListener('dblclick', ev => { if (!ev.target.closest('.node, .chip, .hud')) fit(); });
+  $('#zoom-in').addEventListener('click', () => zoomAt(1.25, ...center()));
+  $('#zoom-out').addEventListener('click', () => zoomAt(.8, ...center()));
+  $('#zoom-level').addEventListener('click', fit);
+  document.addEventListener('keydown', ev => {
+    if (ev.metaKey || ev.ctrlKey || ev.altKey || /input|textarea/i.test(ev.target.tagName)) return;
+    if (ev.key === '+' || ev.key === '=') zoomAt(1.25, ...center());
+    else if (ev.key === '-') zoomAt(.8, ...center());
+    else if (ev.key === '0') fit();
+  });
+  addEventListener('resize', () => { if (!moved) fit(); });
+  fit();
 })();
 </script>
 </body>

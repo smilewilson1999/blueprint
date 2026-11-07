@@ -36,6 +36,7 @@ They work with Claude Code, Codex, Cursor and [any agent that supports skills](h
 - **One path to follow.** The request path is amber and numbered, with a plain-language step list under the diagram.
 - **Flows you can switch.** Request path, nightly sync, deploy: each tab lights up its own edges and dims the rest.
 - **An inspector for every part.** Hover to see what a component talks to; click for its role, notes and links.
+- **Zoom like a design canvas.** Scroll down to zoom in and up to zoom out, around the pointer; drag to pan.
 - **No pixel math.** The agent writes a short [`blueprint.json`](skills/blueprint/references/spec.md); the build lays it out, routes every edge and flags any overlap before you see it.
 
 ## Gallery

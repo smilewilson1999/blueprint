@@ -22,7 +22,8 @@ Sandboxed hosts without root, if launch fails on a missing shared library (e.g. 
 import glob, os, pathlib, sys
 
 SQUARE_CORNERS = (".scroller{border-radius:0!important;border:none!important}"
-                  ".canvas{border-radius:0!important}")
+                  ".canvas{border-radius:0!important}"
+                  ".hud{display:none!important}")   # the zoom controls belong to the page, not the image
 
 def main():
     args = sys.argv[1:]
