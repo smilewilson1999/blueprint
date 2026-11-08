@@ -8,7 +8,8 @@ const rooms = model.rooms || [],
 const byId = new Map([...rooms, ...furniture].map((item) => [item.id, item]));
 const groups = new Map(),
   labels = new Map(),
-  rows = new Map();
+  rows = new Map(),
+  roomRows = new Map();
 const palette = [
   "#d8dfce",
   "#d3dee0",
@@ -160,7 +161,19 @@ rooms.forEach((room, i) => {
   const size = document.createElement("small");
   size.textContent = `${area(room.outline).toFixed(0)} m²`;
   row.append(size);
+  const pieceCount = document.createElement("small");
+  pieceCount.className = "room-piece-count";
+  pieceCount.dataset.room = room.id;
+  row.append(pieceCount);
+  roomRows.set(room.id, pieceCount);
 });
+function refreshRoomCounts() {
+  rooms.forEach((room) => {
+    const count = furniture.filter((piece) => piece.room === room.id).length;
+    const element = roomRows.get(room.id);
+    element.textContent = `${count} piece${count === 1 ? "" : "s"}`;
+  });
+}
 function makeWalls() {
   while (wallGroup.children.length) {
     const child = wallGroup.children[0];
@@ -486,10 +499,46 @@ function movePiece(f, position, rotation) {
   $("#status").textContent = "Unsaved layout · Export JSON to keep changes";
   inspect(f.id);
 }
+function pointOnSegment(point, start, end) {
+  const cross =
+    (point[1] - start[1]) * (end[0] - start[0]) -
+    (point[0] - start[0]) * (end[1] - start[1]);
+  if (Math.abs(cross) > 1e-7) return false;
+  return (
+    point[0] >= Math.min(start[0], end[0]) - 1e-7 &&
+    point[0] <= Math.max(start[0], end[0]) + 1e-7 &&
+    point[1] >= Math.min(start[1], end[1]) - 1e-7 &&
+    point[1] <= Math.max(start[1], end[1]) + 1e-7
+  );
+}
+function pointInRoom(point, outline) {
+  let inside = false;
+  for (let i = 0, j = outline.length - 1; i < outline.length; j = i++) {
+    const start = outline[i];
+    const end = outline[j];
+    if (pointOnSegment(point, start, end)) return true;
+    if (start[1] > point[1] !== end[1] > point[1]) {
+      const x =
+        ((end[0] - start[0]) * (point[1] - start[1])) / (end[1] - start[1]) +
+        start[0];
+      if (point[0] < x) inside = !inside;
+    }
+  }
+  return inside;
+}
+function finishPieceChange(f) {
+  const room = rooms.find((candidate) =>
+    pointInRoom(f.position, candidate.outline),
+  );
+  if (room) f.room = room.id;
+  refreshRoomCounts();
+  inspect(f.id);
+}
 function rotate(delta) {
   if (!editing || !groups.has(selected)) return;
   const f = byId.get(selected);
   movePiece(f, f.position, ((((f.rotation || 0) + delta) % 360) + 360) % 360);
+  finishPieceChange(f);
 }
 function setTheme(value) {
   root.dataset.theme = value;
@@ -608,10 +657,14 @@ viewport.addEventListener("pointermove", (event) => {
   render();
 });
 function endPointer(event) {
+  const active = gesture;
   pointers.delete(event.pointerId);
   if (viewport.hasPointerCapture(event.pointerId))
     viewport.releasePointerCapture(event.pointerId);
   gesture = null;
+  if (active?.kind === "piece" && active.id) {
+    finishPieceChange(byId.get(active.id));
+  }
 }
 viewport.addEventListener("pointerup", endPointer);
 viewport.addEventListener("pointercancel", endPointer);
@@ -685,6 +738,7 @@ document.addEventListener("keydown", (event) => {
       f,
       p.map((n) => Number(n.toFixed(6))),
     );
+    finishPieceChange(f);
   }
 });
 $("#area").textContent = `${area(model.floor).toFixed(0)} m² / metres`;
@@ -692,6 +746,7 @@ $("#room-count").textContent = String(rooms.length);
 $("#piece-count").textContent = String(furniture.length);
 $("#summary").textContent =
   `${rooms.length} named zones · ${furniture.length} pieces · ${grid} m snap grid`;
+refreshRoomCounts();
 new ResizeObserver(() => {
   renderer.setSize(viewport.clientWidth, viewport.clientHeight);
   fit();

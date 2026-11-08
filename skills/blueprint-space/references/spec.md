@@ -101,12 +101,14 @@ chair/sofa seats, shelves and potted plants are procedural shapes, not imported
 models. Desks include a small monitor for readability; footprint size describes
 the desk and height its worktop. Use names and notes for individual purpose.
 
-Edit layout snaps moved centres to `grid`, rotates in 15° increments and keeps
-room assignment fixed. It supports dragging in both views, with floor-plane
-intersection, or arrow keys. Moving between rooms requires updating `room` in
-the exported JSON. Export includes all source objects and extra fields, only
-changing positions/rotations that were edited. Camera, view, theme and
-selection are presentation state and are not exported.
+Edit layout snaps moved centres to `grid` and rotates in 15° increments. When a
+move or rotation ends, the viewer assigns the piece to the room whose outline
+contains its footprint centre. If no room contains that centre, the previous
+`room` is retained so a strict build reports the out-of-room placement. Editing
+supports dragging in both views, with floor-plane intersection, or arrow keys.
+Export includes all source objects and extra fields, changing positions,
+rotations and room assignment only when editing changed them. Camera, view,
+theme and selection are presentation state and are not exported.
 
 ## Build warnings and limits
 

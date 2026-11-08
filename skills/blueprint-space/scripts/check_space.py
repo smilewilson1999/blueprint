@@ -32,6 +32,24 @@ def rebuild(source, target):
     )
 
 
+def plan_screen_point(page, anchor_id, x_ref_id, z_ref_id, target, positions):
+    def screen(item_id):
+        return json.loads(
+            page.locator(f"#space-piece-{item_id}").get_attribute("data-screen")
+        )
+
+    anchor = screen(anchor_id)
+    x_ref = screen(x_ref_id)
+    z_ref = screen(z_ref_id)
+    anchor_position = positions[anchor_id]
+    x_scale = (x_ref[0] - anchor[0]) / (positions[x_ref_id][0] - anchor_position[0])
+    z_scale = (z_ref[1] - anchor[1]) / (positions[z_ref_id][1] - anchor_position[1])
+    return [
+        anchor[0] + (target[0] - anchor_position[0]) * x_scale,
+        anchor[1] + (target[1] - anchor_position[1]) * z_scale,
+    ]
+
+
 def check_edge_cases(page, original, out):
     model = copy.deepcopy(original)
     names = {}
@@ -189,6 +207,42 @@ def main():
         page.locator(f"#space-piece-{piece['id']}").click()
         expect(page.locator("#inspector")).to_contain_text(piece["id"])
         page.screenshot(path=str(args.out / "edited-dark.png"), full_page=True)
+        positions = {item["id"]: item["position"] for item in exported["furniture"]}
+        cross_start = json.loads(
+            page.locator("#space-piece-desk-06").get_attribute("data-screen")
+        )
+        cross_target = plan_screen_point(
+            page,
+            "desk-02",
+            "desk-03",
+            "desk-06",
+            [5.5, 8.0],
+            positions,
+        )
+        page.mouse.move(cross_start[0], cross_start[1])
+        page.mouse.down()
+        page.mouse.move(cross_target[0], cross_target[1], steps=16)
+        page.mouse.up()
+        cross_json = args.out / "cross-room.json"
+        cross_exported = export(page, cross_json)
+        cross_changed = next(
+            item for item in cross_exported["furniture"] if item["id"] == "desk-06"
+        )
+        assert cross_changed["position"] == [5.5, 8], cross_changed
+        assert cross_changed["room"] == "lounge", cross_changed
+        expect(page.locator("#inspector .eyebrow")).to_have_text("Lounge")
+        expect(page.locator("#space-zone-lounge .room-piece-count")).to_have_text(
+            "5 pieces"
+        )
+        page.locator("#space-zone-lounge").click()
+        expect(page.locator("#inspector dl")).to_contain_text("5")
+        cross_rebuilt = args.out / "cross-room.html"
+        rebuild(cross_json, cross_rebuilt)
+        page.goto(cross_rebuilt.resolve().as_uri())
+        cross_model = json.loads(page.locator("#space-model").text_content())
+        assert cross_model == cross_exported, (
+            "cross-room export lost the reassigned room"
+        )
         phone = browser.new_context(
             viewport={"width": 390, "height": 844},
             is_mobile=True,

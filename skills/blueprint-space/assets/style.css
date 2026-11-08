@@ -424,7 +424,7 @@ footer {
   }
   #room-list {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
   .sidebar #inspector {
     min-height: 130px;
