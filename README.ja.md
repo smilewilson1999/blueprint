@@ -13,16 +13,18 @@
 
 </div>
 
-## 二つの skill
+## 三つの skill
 
 | Skill | 描くもの |
 | --- | --- |
 | **blueprint** | ソフトウェア構成：サービス、リクエスト経路、クラウドインフラ |
 | **blueprint-teardown** | 物理的なものの分解図：チップパッケージ、基板、デバイス |
+| **blueprint-space** | 物理空間：オフィス、平面図、部屋、編集できる家具配置 |
 
 ```bash
 npx skills add smilewilson1999/blueprint --skill blueprint
 npx skills add smilewilson1999/blueprint --skill blueprint-teardown
+npx skills add smilewilson1999/blueprint --skill blueprint-space
 ```
 
 Claude Code、Codex、Cursor など、[skills に対応したエージェント](https://agentskills.io)で使えます。Claude アプリでは [Releases](https://github.com/smilewilson1999/blueprint/releases/latest) から該当する zip をアップロードしてください。あとはこう頼むだけです：
@@ -85,11 +87,20 @@ Claude Code、Codex、Cursor など、[skills に対応したエージェント]
       <p><b>チップパッケージ（blueprint-teardown）</b><br><sub>CoWoS 型パッケージの組立図と分解図。HBM スタック数と DRAM 層数はスライダーで変えられ、SVG・PNG・PDF をダウンロードできます。寸法を創作したコンセプト図です。</sub></p>
     </td>
   </tr>
+  <tr>
+    <td colspan="2" valign="top">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/space-dark.png">
+        <img src="docs/space.png" alt="架空のコワーキングオフィス Juniper Commons。六つの部屋と家具を3Dで表示し、Plan、Edit layout、JSON書き出しを備える" width="100%">
+      </picture>
+      <p><b>配置を変えられる空間（blueprint-space）</b><br><sub>架空のコワーキングオフィス Juniper Commons。3Dで回転し、平面図に切り替え、部屋や家具を選択。家具をグリッドに沿って移動・回転し、space.json に書き出して再ビルドできます。オフラインで動作します。</sub></p>
+    </td>
+  </tr>
 </table>
 
 ## artifact.cafe でレビュー
 
-どちらの skill も自己完結した HTML ファイルを一つ作ります。エージェントが [artifact.cafe](https://artifact.cafe) に公開してリンクを渡し、レビュアーはアカウントなしで、部品・ラベル・テキストのどこにでもコメントできます。設計が変われば、エージェントが新しい版を公開し、各スレッドに返信します。
+三つの skill はいずれも自己完結した HTML ファイルを一つ作ります。エージェントが [artifact.cafe](https://artifact.cafe) に公開してリンクを渡し、レビュアーはアカウントなしで、部品・ラベル・テキストのどこにでもコメントできます。設計が変われば、エージェントが新しい版を公開し、各スレッドに返信します。
 
 <img src="docs/review.png" alt="チェックアウト構成図へのゲストコメント3件：Neon、webhook ラベル、Clerk にアンバーのピンが付き、横のコメント一覧に各スレッドと対象が表示されている" width="100%">
 
@@ -99,7 +110,7 @@ Claude Code、Codex、Cursor など、[skills に対応したエージェント]
 <summary><b>ライトとダーク</b></summary>
 <br>
 
-どの図もライトとダークの両方のテーマを持ち、読み手のシステム設定に合わせて切り替わります。タイルは明るいままなので、各ロゴは本来の色を保ちます。
+どの図もライトとダークの両方のテーマを持ち、読み手のシステム設定に合わせて切り替わります。構成図のタイルは明るいままなので、各ロゴは本来の色を保ちます。
 
 <img src="docs/light-dark.png" alt="ドキュメント Q&A ボットの図を対角線で分割：左上がライトテーマ、右下がダークテーマ" width="100%">
 </details>
@@ -132,6 +143,15 @@ npm install && npm run build    # dist/index.html
 npm run film                    # 任意：デモ動画。Python Playwright と ffmpeg が必要
 ```
 
+blueprint-space には Python 3.9 以上が必要で、オフラインでビルドできます。PNG とブラウザの検証には Python Playwright と Chromium も必要です：
+
+```bash
+cd examples/juniper-commons
+python3 ../../skills/blueprint-space/scripts/space.py space.json index.html --strict
+python3 ../../skills/blueprint-space/scripts/check_space.py index.html check/
+python3 ../../skills/blueprint-space/scripts/render_png.py index.html space.png --view both
+```
+
 PNG の書き出しと proof には Playwright と Chromium を使います。
 </details>
 
@@ -141,5 +161,7 @@ blueprint は caru-ini による [stack-diagram](https://github.com/caru-ini/sta
 
 - コードとドキュメント：MIT。[`LICENSE`](LICENSE) を参照。
 - `skills/blueprint-teardown/engine/` の teardown エンジン：MIT、Copyright (c) 2026 Jakub Krehel。[`engine/LICENSE`](skills/blueprint-teardown/engine/LICENSE) を参照。
+- `skills/blueprint-space/assets/vendor/` に同梱した three.js **0.170.0**：MIT。[`vendor/LICENSE`](skills/blueprint-space/assets/vendor/LICENSE) と [`vendor/PATCHES.md`](skills/blueprint-space/assets/vendor/PATCHES.md) を参照。
 - 同梱フォント（Inter、IBM Plex Mono）：SIL Open Font License 1.1。[`assets/fonts`](skills/blueprint/assets/fonts) を参照。
+- 空間用 skill も同じ OFL フォントを [`blueprint-space/assets/fonts`](skills/blueprint-space/assets/fonts) に同梱しています。
 - ロゴは同梱して**いません**。ビルド時に上記の提供元からダウンロードします。`docs/` の画像には第三者のロゴが含まれます。ブランド名とロゴはすべて各所有者の商標であり、図での使用は推奨や提携を意味しません。

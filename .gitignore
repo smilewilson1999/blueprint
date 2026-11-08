@@ -14,3 +14,9 @@ examples/cowos/dist/
 examples/cowos/proof/
 examples/cowos/check/
 examples/cowos/film/.cache/
+
+# blueprint-space example renders and local verification
+examples/juniper-commons/*.png
+examples/juniper-commons/check/
+proof/
+check/

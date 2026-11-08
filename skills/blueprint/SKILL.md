@@ -1,6 +1,6 @@
 ---
 name: blueprint
-description: "Create premium, interactive architecture diagrams of tech stacks, system architectures, infra layouts and service topologies, with real brand logos, grouped windows, numbered request flows and orthogonal edges, delivered as one self-contained HTML file that publishes to artifact.cafe for review (plus PNGs). Use this skill whenever the user asks for an architecture / system / stack / infra diagram, a tech-stack overview, a service topology, a cloud-vendor-style diagram, a diagram to get feedback on, or wants tech logos arranged into a picture of how their services connect, in any language, even if they don't name an output format and even if the tools involved aren't cloud services."
+description: "Create premium, interactive architecture diagrams of tech stacks, system architectures, infra layouts and service topologies, with real brand logos, grouped windows, numbered request flows and orthogonal edges, delivered as one self-contained HTML file that publishes to artifact.cafe for review (plus PNGs). Use this skill whenever the user asks for an architecture / system / stack / infra diagram, a tech-stack overview, a service topology, a cloud-vendor-style diagram, a diagram to get feedback on, or wants tech logos arranged into a picture of how their services connect, in any language, even if they don't name an output format and even if the tools involved aren't cloud services. For physical spaces, floor plans and furniture layouts use blueprint-space; for exploded physical objects and layered internals use blueprint-teardown."
 license: MIT (see LICENSE); bundled fonts are SIL OFL 1.1
 compatibility: Python 3.9+ and network access to fetch logos; PNG output also needs Playwright with Chromium
 ---
@@ -13,6 +13,14 @@ as small OS windows, one amber request path with numbered steps, flow tabs, an
 inspector, and light and dark themes. The HTML is the source of truth. It is
 built to be reviewed on artifact.cafe, where every node name is real text a
 reviewer can quote and every node has a stable id.
+
+## Which skill
+
+| The user wants to show | Use |
+| --- | --- |
+| How services, APIs and data stores connect; a request path | `blueprint` |
+| How a physical object is built: layers, parts, how they fit | `blueprint-teardown` |
+| A physical space: rooms, floor plan, furniture placement | `blueprint-space` |
 
 ## Workflow
 

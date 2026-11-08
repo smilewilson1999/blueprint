@@ -1,6 +1,6 @@
 ---
 name: blueprint-teardown
-description: "Create exploded technical illustrations of physical things and layered build-ups, such as semiconductor packages (CoWoS, InFO, flip-chip BGA, HBM stacks), boards, devices and their internals, or a concept drawn as stacked plates, as an interactive page with assembled and exploded views, part labels, color, SVG/PNG/PDF downloads, and review on artifact.cafe. Use this skill when the user asks for a teardown, exploded view, cutaway, package or chip structure, stack-up, or how a physical object is built, in any language. For services, request flows and cloud architecture, use the blueprint skill instead."
+description: "Create exploded technical illustrations of physical things and layered build-ups, such as semiconductor packages (CoWoS, InFO, flip-chip BGA, HBM stacks), boards, devices and their internals, or a concept drawn as stacked plates, as an interactive page with assembled and exploded views, part labels, color, SVG/PNG/PDF downloads, and review on artifact.cafe. Use this skill when the user asks for a teardown, exploded view, cutaway, package or chip structure, stack-up, or how a physical object is built, in any language. For services, request flows and cloud architecture, use the blueprint skill instead. For physical spaces, floor plans and furniture layouts, use blueprint-space."
 license: MIT (see LICENSE); the engine is teardown by Jakub Krehel, MIT (see engine/LICENSE)
 compatibility: Node 22+ with npm; Chrome or Chromium for proofs and checks
 ---
@@ -21,6 +21,7 @@ by Jakub Krehel, in `engine/` with the small changes listed in `engine/PATCHES.m
 | The user wants to show | Use |
 | --- | --- |
 | How services, APIs and data stores connect; a request path | `blueprint` |
+| A physical space: rooms, floor plan, furniture placement | `blueprint-space` |
 | How a physical object is built: layers, parts, how they fit | `blueprint-teardown` |
 | A concept with no physical form, explained as layers (display pixels, an interface stack) | `blueprint-teardown`, as stacked plates |
 
