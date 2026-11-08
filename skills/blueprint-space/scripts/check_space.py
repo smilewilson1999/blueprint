@@ -3,7 +3,9 @@
 
 import argparse
 import copy
+import importlib.util
 import json
+import math
 import subprocess
 import sys
 from pathlib import Path
@@ -11,6 +13,9 @@ from pathlib import Path
 from playwright.sync_api import expect, sync_playwright
 
 BUILDER = Path(__file__).with_name("space.py")
+SPACE_SPEC = importlib.util.spec_from_file_location("space_builder", BUILDER)
+SPACE = importlib.util.module_from_spec(SPACE_SPEC)
+SPACE_SPEC.loader.exec_module(SPACE)
 
 
 def export(page, target):
@@ -48,6 +53,89 @@ def plan_screen_point(page, anchor_id, x_ref_id, z_ref_id, target, positions):
         anchor[0] + (target[0] - anchor_position[0]) * x_scale,
         anchor[1] + (target[1] - anchor_position[1]) * z_scale,
     ]
+
+
+def find_cross_room_case(model):
+    rooms = model.get("rooms", [])
+    furniture = model.get("furniture", [])
+    if len(rooms) < 2:
+        return None, "the model has fewer than two rooms"
+    if not furniture:
+        return None, "the model has no furniture to move"
+    grid = model.get("grid", 0.25)
+    walls = model.get("walls", [])
+    doors = model.get("doors", [])
+    footprints = {
+        item["id"]: SPACE.rectangle(
+            item["position"], item["size"], item.get("rotation", 0)
+        )
+        for item in furniture
+    }
+    wall_clearances = [SPACE.wall_rectangle(wall) for wall in walls]
+    for door in doors:
+        wall = next((item for item in walls if item["id"] == door["wall"]), None)
+        if wall:
+            wall_clearances.append(
+                SPACE.wall_rectangle(
+                    wall,
+                    door["offset"],
+                    door["offset"] + door["width"],
+                    2 * door["width"],
+                )
+            )
+    for piece in furniture:
+        source_room = piece["room"]
+        for room in rooms:
+            if room["id"] == source_room:
+                continue
+            outline = room["outline"]
+            xs, zs = zip(*outline)
+            half_width, half_depth = piece["size"][0] / 2, piece["size"][1] / 2
+            min_x = math.ceil((min(xs) + half_width) / grid)
+            max_x = math.floor((max(xs) - half_width) / grid)
+            min_z = math.ceil((min(zs) + half_depth) / grid)
+            max_z = math.floor((max(zs) - half_depth) / grid)
+            candidates = (max_x - min_x + 1) * (max_z - min_z + 1)
+            if candidates > 100_000:
+                continue
+            for ix in range(min_x, max_x + 1):
+                for iz in range(min_z, max_z + 1):
+                    position = [round(ix * grid, 6), round(iz * grid, 6)]
+                    footprint = SPACE.rectangle(
+                        position, piece["size"], piece.get("rotation", 0)
+                    )
+                    if not SPACE.contained(footprint, outline):
+                        continue
+                    if not SPACE.contained(footprint, model["floor"]):
+                        continue
+                    if any(
+                        SPACE.overlap(footprint, other)
+                        for ident, other in footprints.items()
+                        if ident != piece["id"]
+                    ):
+                        continue
+                    if any(SPACE.overlap(footprint, wall) for wall in wall_clearances):
+                        continue
+                    return {
+                        "piece": piece,
+                        "room": room,
+                        "position": position,
+                    }, None
+    return None, "no grid-snapped free spot fits a piece in another room"
+
+
+def screen_references(model, anchor_id):
+    positions = {item["id"]: item["position"] for item in model["furniture"]}
+    anchor = positions[anchor_id]
+    x_ref = next(
+        (item for item in model["furniture"] if item["position"][0] != anchor[0]), None
+    )
+    z_ref = next(
+        (item for item in model["furniture"] if item["position"][1] != anchor[1]), None
+    )
+    if not x_ref or not z_ref:
+        return None
+    return positions, x_ref["id"], z_ref["id"]
 
 
 def check_edge_cases(page, original, out):
@@ -207,42 +295,83 @@ def main():
         page.locator(f"#space-piece-{piece['id']}").click()
         expect(page.locator("#inspector")).to_contain_text(piece["id"])
         page.screenshot(path=str(args.out / "edited-dark.png"), full_page=True)
-        positions = {item["id"]: item["position"] for item in exported["furniture"]}
-        cross_start = json.loads(
-            page.locator("#space-piece-desk-06").get_attribute("data-screen")
-        )
-        cross_target = plan_screen_point(
-            page,
-            "desk-02",
-            "desk-03",
-            "desk-06",
-            [5.5, 8.0],
-            positions,
-        )
-        page.mouse.move(cross_start[0], cross_start[1])
-        page.mouse.down()
-        page.mouse.move(cross_target[0], cross_target[1], steps=16)
-        page.mouse.up()
-        cross_json = args.out / "cross-room.json"
-        cross_exported = export(page, cross_json)
-        cross_changed = next(
-            item for item in cross_exported["furniture"] if item["id"] == "desk-06"
-        )
-        assert cross_changed["position"] == [5.5, 8], cross_changed
-        assert cross_changed["room"] == "lounge", cross_changed
-        expect(page.locator("#inspector .eyebrow")).to_have_text("Lounge")
-        expect(page.locator("#space-zone-lounge .room-piece-count")).to_have_text(
-            "5 pieces"
-        )
-        page.locator("#space-zone-lounge").click()
-        expect(page.locator("#inspector dl")).to_contain_text("5")
-        cross_rebuilt = args.out / "cross-room.html"
-        rebuild(cross_json, cross_rebuilt)
-        page.goto(cross_rebuilt.resolve().as_uri())
-        cross_model = json.loads(page.locator("#space-model").text_content())
-        assert cross_model == cross_exported, (
-            "cross-room export lost the reassigned room"
-        )
+        cross_case, cross_skip = find_cross_room_case(exported)
+        if cross_case is None:
+            print(f"NOTE cross-room case skipped: {cross_skip}")
+            cross_result = f"cross-room case skipped ({cross_skip})"
+        else:
+            cross_piece = cross_case["piece"]
+            cross_room = cross_case["room"]
+            references = screen_references(exported, cross_piece["id"])
+            if references is None:
+                print(
+                    "NOTE cross-room case skipped: no independent Plan screen references"
+                )
+                cross_result = (
+                    "cross-room case skipped (no independent Plan screen references)"
+                )
+            else:
+                positions, x_ref_id, z_ref_id = references
+                cross_start = json.loads(
+                    page.locator(f"#space-piece-{cross_piece['id']}").get_attribute(
+                        "data-screen"
+                    )
+                )
+                cross_target = plan_screen_point(
+                    page,
+                    cross_piece["id"],
+                    x_ref_id,
+                    z_ref_id,
+                    cross_case["position"],
+                    positions,
+                )
+                page.mouse.move(cross_start[0], cross_start[1])
+                page.mouse.down()
+                page.mouse.move(cross_target[0], cross_target[1], steps=16)
+                page.mouse.up()
+                cross_json = args.out / "cross-room.json"
+                cross_exported = export(page, cross_json)
+                cross_changed = next(
+                    item
+                    for item in cross_exported["furniture"]
+                    if item["id"] == cross_piece["id"]
+                )
+                assert cross_changed["position"] == cross_case["position"], (
+                    cross_changed
+                )
+                assert cross_changed["room"] == cross_room["id"], cross_changed
+                expect(page.locator("#inspector .eyebrow")).to_have_text(
+                    cross_room["name"]
+                )
+                expected_count = sum(
+                    item["room"] == cross_room["id"]
+                    for item in cross_exported["furniture"]
+                )
+                expect(
+                    page.locator(f"#space-zone-{cross_room['id']} .room-piece-count")
+                ).to_have_text(
+                    f"{expected_count} piece" + ("s" if expected_count != 1 else "")
+                )
+                page.locator(f"#space-zone-{cross_room['id']}").click()
+                pieces_label = page.locator("#inspector dl dt").filter(
+                    has_text="Pieces"
+                )
+                pieces_value = pieces_label.locator("xpath=following-sibling::dd[1]")
+                assert pieces_value.inner_text().strip() == str(expected_count), (
+                    pieces_value.inner_text(),
+                    expected_count,
+                )
+                cross_rebuilt = args.out / "cross-room.html"
+                rebuild(cross_json, cross_rebuilt)
+                page.goto(cross_rebuilt.resolve().as_uri())
+                cross_model = json.loads(page.locator("#space-model").text_content())
+                assert cross_model == cross_exported, (
+                    "cross-room export lost the reassigned room"
+                )
+                cross_result = (
+                    f"cross-room move/rebuild passed ({cross_piece['id']} -> "
+                    f"{cross_room['id']}, {cross_case['position']})"
+                )
         phone = browser.new_context(
             viewport={"width": 390, "height": 844},
             is_mobile=True,
@@ -297,7 +426,8 @@ def main():
     assert not errors, errors
     assert not requests, requests
     print(
-        "PASS orbit; V/Plan; E/edit; drag + grid; rotation; room/piece inspector; unchanged export identical HTML; moved export/rebuild + stable ids; theme; touch orbit/pinch at 390px; zero page errors; zero external requests"
+        "PASS orbit; V/Plan; E/edit; drag + grid; rotation; room/piece inspector; unchanged export identical HTML; moved export/rebuild + stable ids; "
+        f"{cross_result}; theme; touch orbit/pinch at 390px; zero page errors; zero external requests"
     )
 
 

@@ -80,11 +80,15 @@ python3 scripts/check_space.py index.html check/
 ```
 
 For a furnished space, this exercises orbit, V/Plan, E/edit, dragging the first
-piece, 15° rotation, grid snapping, room and piece inspectors, theme switching,
-and touch orbit/pinch at 390 px. It rejects page errors and external requests.
-It downloads an unchanged JSON and requires its rebuilt HTML to be identical,
-then downloads an edited JSON and requires the moved position and ids to
-survive rebuilding. `check/` holds the downloaded files and browser proofs.
+piece, 15° rotation, grid snapping, room and piece inspectors, a model-derived
+cross-room move with room-count refresh and strict export/rebuild, theme
+switching, and touch orbit/pinch at 390 px. It rejects page errors and external
+requests. It downloads an unchanged JSON and requires its rebuilt HTML to be
+identical, then downloads edited JSON and requires moved positions, room
+assignments and ids to survive rebuilding. If the model has one room or no
+free grid-snapped cross-room spot, the cross-room case is reported as skipped;
+the other checks still run. `check/` holds the downloaded files and browser
+proofs.
 Leave clear space around the first piece for the check's drag and rotation;
 if it finds a collision, inspect its exported JSON and improve the layout.
 
