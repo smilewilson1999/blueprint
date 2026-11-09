@@ -90,8 +90,8 @@ They work with Claude Code, Codex, Cursor and [any agent that supports skills](h
   <tr>
     <td colspan="2" valign="top">
       <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="docs/space-dark.png">
-        <img src="docs/space.png" alt="Juniper Commons, a fictional co-working office in 3D with six named rooms, furniture, a Plan toggle, Edit layout and JSON export" width="100%">
+        <source media="(prefers-color-scheme: dark)" srcset="docs/space-gallery-dark.png">
+        <img src="docs/space-gallery.png" alt="Juniper Commons, a fictional co-working office with six named rooms and furniture, shown in 3D and Plan side by side" width="100%">
       </picture>
       <p><b>A space to rearrange, with blueprint-space</b><br><sub>Juniper Commons, a fictional co-working office. Orbit in 3D, switch to Plan, inspect rooms and pieces, drag and rotate furniture on a grid, then export space.json to rebuild the layout. Works offline.</sub></p>
     </td>
