@@ -217,11 +217,21 @@ def assert_piece_centres_on_canvas(page, context):
 
 def assert_visible_labels_in_rooms(page, model, context):
     rooms = {room["id"]: room["outline"] for room in model.get("rooms", [])}
+    viewport = page.locator("#viewport").bounding_box()
     labels = page.locator(".room-label").evaluate_all(
         """
         elements => elements
           .filter(element => getComputedStyle(element).visibility !== 'hidden')
-          .map(element => ({id: element.dataset.room, point: JSON.parse(element.dataset.floorPoint)}))
+          .map(element => {
+            const rect = element.getBoundingClientRect();
+            return {
+              id: element.dataset.room,
+              point: JSON.parse(element.dataset.floorPoint),
+              screen: JSON.parse(element.dataset.screen),
+              center: [(rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2],
+              rect: {left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom},
+            };
+          })
         """
     )
     for label in labels:
@@ -229,6 +239,16 @@ def assert_visible_labels_in_rooms(page, model, context):
         assert SPACE.inside(label["point"], rooms[label["id"]]), (
             f"{context}: label {label['id']} floor point left its room"
         )
+        assert all(
+            abs(actual - expected) <= 1
+            for actual, expected in zip(label["center"], label["screen"])
+        ), f"{context}: label {label['id']} center does not match its floor projection"
+        assert (
+            label["rect"]["left"] >= viewport["x"] - 1
+            and label["rect"]["right"] <= viewport["x"] + viewport["width"] + 1
+            and label["rect"]["top"] >= viewport["y"] - 1
+            and label["rect"]["bottom"] <= viewport["y"] + viewport["height"] + 1
+        ), f"{context}: label {label['id']} is clipped by the viewport"
 
 
 def assert_layout_state(page, model, context):
@@ -266,6 +286,12 @@ def check_label_layouts(browser, html, model, errors, requests):
         page.set_viewport_size({"width": width - 16, "height": height})
         page.wait_for_timeout(50)
         assert_layout_state(page, model, f"{width} 3D resize")
+        if width == 360:
+            page.locator("#zoom-in").click()
+            assert_layout_state(page, model, "360 3D zoom-in")
+            page.locator("#theme").click()
+            assert_layout_state(page, model, "360 3D theme toggle")
+            page.locator("#theme").click()
         page.keyboard.press("v")
         expect(page.locator("#view-plan")).to_have_attribute("aria-pressed", "true")
         assert_layout_state(page, model, f"{width} Plan load")

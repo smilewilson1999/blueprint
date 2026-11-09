@@ -349,7 +349,7 @@ function labelCandidates(room) {
   const outline = room.outline;
   const centre = centroid(outline);
   const raw = room.label ? [room.label] : [centre];
-  raw.push(centre);
+  if (room.label) raw.push(centre);
   outline.forEach((point) => {
     raw.push([
       point[0] * 0.55 + centre[0] * 0.45,
@@ -421,11 +421,13 @@ function placeRoomLabels() {
     const label = labels.get(room.id);
     const measure = label.cloneNode(true);
     measure.removeAttribute("id");
+    measure.classList.remove("compact");
     measure.style.visibility = "hidden";
     measure.style.left = "0px";
     measure.style.top = "0px";
     $("#labels").append(measure);
     const areaLabel = measure.querySelector(".room-area");
+    if (areaLabel) areaLabel.hidden = false;
     const full = measure.getBoundingClientRect();
     if (areaLabel) areaLabel.hidden = true;
     measure.classList.add("compact");
@@ -473,17 +475,22 @@ function placeRoomLabels() {
       if (chosen) break;
     }
     if (chosen) {
-      label.hidden = false;
       label.style.visibility = "visible";
       label.style.left = `${chosen.x}px`;
       label.style.top = `${chosen.y}px`;
       label.dataset.floorPoint = JSON.stringify(chosen.point);
+      const viewportRect = viewport.getBoundingClientRect();
+      label.dataset.screen = JSON.stringify([
+        chosen.x + viewportRect.left,
+        chosen.y + viewportRect.top,
+      ]);
       label.classList.toggle("compact", chosen.compact);
       if (areaLabel) areaLabel.hidden = chosen.compact;
       occupied.push(chosen.bounds);
     } else {
       label.style.visibility = "hidden";
       label.dataset.floorPoint = "";
+      label.dataset.screen = "";
     }
   });
 }
@@ -746,8 +753,7 @@ viewport.addEventListener("pointerdown", (event) => {
     return;
   }
   const hitId = hit(event.clientX, event.clientY);
-  const labelId = event.target.closest(".room-label")?.id.slice(11);
-  const id = editing ? hitId || labelId : labelId || hitId;
+  const id = hitId;
   const p = groundPoint(event.clientX, event.clientY);
   if (id) inspect(id);
   gesture = {
