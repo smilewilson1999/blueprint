@@ -55,6 +55,20 @@ def plan_screen_point(page, anchor_id, x_ref_id, z_ref_id, target, positions):
     ]
 
 
+def polygon_bounds(polygon):
+    xs, zs = zip(*polygon)
+    return min(xs), min(zs), max(xs), max(zs)
+
+
+def bounds_overlap(first, second):
+    return (
+        first[0] < second[2]
+        and first[2] > second[0]
+        and first[1] < second[3]
+        and first[3] > second[1]
+    )
+
+
 def find_cross_room_case(model):
     rooms = model.get("rooms", [])
     furniture = model.get("furniture", [])
@@ -83,6 +97,10 @@ def find_cross_room_case(model):
                     2 * door["width"],
                 )
             )
+    clearance_bounds = [polygon_bounds(item) for item in wall_clearances]
+    furniture_bounds = {
+        ident: polygon_bounds(footprint) for ident, footprint in footprints.items()
+    }
     for piece in furniture:
         source_room = piece["room"]
         for room in rooms:
@@ -90,17 +108,31 @@ def find_cross_room_case(model):
                 continue
             outline = room["outline"]
             xs, zs = zip(*outline)
-            half_width, half_depth = piece["size"][0] / 2, piece["size"][1] / 2
+            angle = math.radians(piece.get("rotation", 0))
+            half_width = (
+                abs(piece["size"][0] * math.cos(angle))
+                + abs(piece["size"][1] * math.sin(angle))
+            ) / 2
+            half_depth = (
+                abs(piece["size"][0] * math.sin(angle))
+                + abs(piece["size"][1] * math.cos(angle))
+            ) / 2
             min_x = math.ceil((min(xs) + half_width) / grid)
             max_x = math.floor((max(xs) - half_width) / grid)
             min_z = math.ceil((min(zs) + half_depth) / grid)
             max_z = math.floor((max(zs) - half_depth) / grid)
             candidates = (max_x - min_x + 1) * (max_z - min_z + 1)
-            if candidates > 100_000:
+            if candidates <= 0:
                 continue
+            multiple = max(1, math.ceil(math.sqrt(candidates / 100_000)))
+            search_grid = grid * multiple
+            min_x = math.ceil((min(xs) + half_width) / search_grid)
+            max_x = math.floor((max(xs) - half_width) / search_grid)
+            min_z = math.ceil((min(zs) + half_depth) / search_grid)
+            max_z = math.floor((max(zs) - half_depth) / search_grid)
             for ix in range(min_x, max_x + 1):
                 for iz in range(min_z, max_z + 1):
-                    position = [round(ix * grid, 6), round(iz * grid, 6)]
+                    position = [round(ix * search_grid, 6), round(iz * search_grid, 6)]
                     footprint = SPACE.rectangle(
                         position, piece["size"], piece.get("rotation", 0)
                     )
@@ -108,13 +140,19 @@ def find_cross_room_case(model):
                         continue
                     if not SPACE.contained(footprint, model["floor"]):
                         continue
+                    footprint_bounds = polygon_bounds(footprint)
                     if any(
-                        SPACE.overlap(footprint, other)
+                        bounds_overlap(footprint_bounds, furniture_bounds[ident])
+                        and SPACE.overlap(footprint, other)
                         for ident, other in footprints.items()
                         if ident != piece["id"]
                     ):
                         continue
-                    if any(SPACE.overlap(footprint, wall) for wall in wall_clearances):
+                    if any(
+                        bounds_overlap(footprint_bounds, bounds)
+                        and SPACE.overlap(footprint, wall)
+                        for wall, bounds in zip(wall_clearances, clearance_bounds)
+                    ):
                         continue
                     return {
                         "piece": piece,
@@ -162,7 +200,7 @@ def check_edge_cases(page, original, out):
     model["title"] = payload
     model["furniture"][0]["name"] = payload
     model["furniture"][0]["rotation"] = -720
-    model["metadata"] = {"2": "second", "1": "first", "zero": -0.0}
+    model["metadata"] = {"z-second": "second", "a-first": "first", "zero": -0.0}
     source, output = out / "edge-cases.json", out / "edge-cases.html"
     source.write_text(json.dumps(model), encoding="utf-8")
     rebuild(source, output)
@@ -340,6 +378,18 @@ def main():
                     cross_changed
                 )
                 assert cross_changed["room"] == cross_room["id"], cross_changed
+                expected_changed = copy.deepcopy(cross_piece)
+                expected_changed["position"] = cross_case["position"]
+                expected_changed["room"] = cross_room["id"]
+                assert cross_changed == expected_changed, cross_changed
+                before_other_pieces = {
+                    item["id"]: item
+                    for item in exported["furniture"]
+                    if item["id"] != cross_piece["id"]
+                }
+                for item in cross_exported["furniture"]:
+                    if item["id"] != cross_piece["id"]:
+                        assert item == before_other_pieces[item["id"]], item["id"]
                 expect(page.locator("#inspector .eyebrow")).to_have_text(
                     cross_room["name"]
                 )

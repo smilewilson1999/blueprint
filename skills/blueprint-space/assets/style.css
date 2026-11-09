@@ -192,6 +192,9 @@ h1 {
   white-space: nowrap;
   box-shadow: 0 2px 5px #0000000b;
 }
+#viewport.editing .room-label {
+  pointer-events: none;
+}
 .room-label small {
   display: block;
   color: var(--muted);
@@ -319,6 +322,20 @@ dd {
   padding: 7px 8px;
   font-size: 12px;
 }
+.room-row > span:first-child {
+  flex: 1;
+  min-width: 0;
+}
+.room-row > small:not(.room-piece-count) {
+  flex: none;
+  width: 42px;
+  text-align: right;
+}
+.room-row .room-piece-count {
+  flex: none;
+  width: 58px;
+  text-align: right;
+}
 .room-row small,
 .piece-row small {
   font: 10px/1.8 var(--mono);
@@ -431,10 +448,11 @@ footer {
   }
   .room-label {
     font-size: 10px;
-    padding: 3px 6px;
+    min-height: 36px;
+    padding: 6px 8px;
   }
   .room-label small {
-    font-size: 8px;
+    font-size: 9px;
   }
   .under,
   footer {

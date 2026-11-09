@@ -61,14 +61,15 @@ them to identify their comments.
 ## Step 3: Build
 
 ```bash
-python3 scripts/space.py space.json index.html --strict
+python3 scripts/space.py space.json dist/index.html --strict
 ```
 
 Fix every `WARN`: overlaps, furniture outside its room or floor, furniture
 crossing walls, blocked doors, unknown references and invalid openings. Invalid
 schema always fails. `--strict` also fails on layout warnings and writes no new
 HTML; an older output file may still exist. Change the JSON and rebuild rather
-than editing the generated page.
+than editing the generated page. Keep `dist/` for `index.html` only; checks and
+PNGs stay outside it.
 
 Wall heights remain in the source; 3D displays a cutaway capped at 1.2 m and
 Plan displays wall footprints. Windows appear within the visible cutaway.
@@ -76,7 +77,7 @@ Plan displays wall footprints. Windows appear within the visible cutaway.
 ## Step 4: Check it
 
 ```bash
-python3 scripts/check_space.py index.html check/
+python3 scripts/check_space.py dist/index.html check/
 ```
 
 For a furnished space, this exercises orbit, V/Plan, E/edit, dragging the first
@@ -89,8 +90,6 @@ assignments and ids to survive rebuilding. If the model has one room or no
 free grid-snapped cross-room spot, the cross-room case is reported as skipped;
 the other checks still run. `check/` holds the downloaded files and browser
 proofs.
-Leave clear space around the first piece for the check's drag and rotation;
-if it finds a collision, inspect its exported JSON and improve the layout.
 
 Controls: drag empty space to orbit in 3D or pan in Plan; right-drag or
 Shift-drag pans in 3D; scroll or pinch zooms; Fit / `0` reframes. One finger
@@ -106,8 +105,8 @@ Keep that exported file; rebuilding the old source would discard the changes.
 ## Step 5: Look at it
 
 ```bash
-python3 scripts/render_png.py index.html space.png --view both
-python3 scripts/render_png.py index.html phone.png --view both --width 390 --height 844
+python3 scripts/render_png.py dist/index.html space.png --view both
+python3 scripts/render_png.py dist/index.html phone.png --view both --width 390 --height 844
 ```
 
 Each command writes four files: light and dark 3D, and `-plan` / `-plan-dark`.
@@ -121,11 +120,11 @@ installed skill folder.
 ## Step 6: Deliver
 
 **Default delivery, when publishing is authorized: review on artifact.cafe.**
-Publish the folder containing `index.html` with the artifact-cafe skill or CLI
-(`npx artifact-cafe@latest publish <dir>`), using the space title. Share the
-review URL. Reviewers can comment on names, ids and inspector text without an
-account. If publishing is outside the authorized scope, deliver the local HTML
-and PNGs instead.
+Publish only the `dist/` folder with the artifact-cafe skill or CLI
+(`npx artifact-cafe@latest publish dist`), using the space title. Keep `check/`
+and PNGs outside the published folder. Share the review URL. Reviewers can
+comment on names, ids and inspector text without an account. If publishing is
+outside the authorized scope, deliver the local HTML and PNGs instead.
 
 When comments come back, update `space.json` (starting with the exported file
 if the layout was edited), rebuild and publish the next version into the same

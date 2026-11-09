@@ -147,10 +147,12 @@ blueprint-space needs Python 3.9+ and builds offline. Rendering and browser chec
 
 ```bash
 cd examples/juniper-commons
-python3 ../../skills/blueprint-space/scripts/space.py space.json index.html --strict
-python3 ../../skills/blueprint-space/scripts/check_space.py index.html check/
-python3 ../../skills/blueprint-space/scripts/render_png.py index.html space.png --view both
+python3 ../../skills/blueprint-space/scripts/space.py space.json dist/index.html --strict
+python3 ../../skills/blueprint-space/scripts/check_space.py dist/index.html check/
+python3 ../../skills/blueprint-space/scripts/render_png.py dist/index.html space.png --view both
 ```
+
+The generated `dist/` folder contains only `index.html`; keep `check/` and PNGs outside it and publish only `dist/` to artifact.cafe.
 
 PNG export and proofs use Playwright with Chromium.
 </details>

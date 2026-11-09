@@ -102,10 +102,10 @@ class SpaceChecks(unittest.TestCase):
         normalized["furniture"][0]["position"] = [5, 4]
         normalized["metadata"]["zero"] = 0
         self.assertEqual(page, space.build(normalized)[0])
-        model["metadata"] = {"2": "second", "1": "first"}
+        model["metadata"] = {"z-second": "second", "a-first": "first"}
         reordered = copy.deepcopy(model)
-        reordered["metadata"] = {"1": "first", "2": "second"}
-        self.assertEqual(space.build(model)[0], space.build(reordered)[0])
+        reordered["metadata"] = {"a-first": "first", "z-second": "second"}
+        self.assertNotEqual(space.build(model)[0], space.build(reordered)[0])
         model["metadata"]["too_large"] = 9007199254740993
         with self.assertRaises(ValueError):
             space.validate(model)

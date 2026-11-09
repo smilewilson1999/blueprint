@@ -147,10 +147,12 @@ blueprint-space には Python 3.9 以上が必要で、オフラインでビル�
 
 ```bash
 cd examples/juniper-commons
-python3 ../../skills/blueprint-space/scripts/space.py space.json index.html --strict
-python3 ../../skills/blueprint-space/scripts/check_space.py index.html check/
-python3 ../../skills/blueprint-space/scripts/render_png.py index.html space.png --view both
+python3 ../../skills/blueprint-space/scripts/space.py space.json dist/index.html --strict
+python3 ../../skills/blueprint-space/scripts/check_space.py dist/index.html check/
+python3 ../../skills/blueprint-space/scripts/render_png.py dist/index.html space.png --view both
 ```
+
+生成された `dist/` には `index.html` だけを置き、`check/` と PNG は外に置き、artifact.cafe には `dist/` だけを公開します。
 
 PNG の書き出しと proof には Playwright と Chromium を使います。
 </details>

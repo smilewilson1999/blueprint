@@ -332,9 +332,7 @@ def build(model):
     }
     values.update(
         LANG=html.escape(model.get("lang", "en"), quote=True),
-        MODEL=json.dumps(
-            model, ensure_ascii=True, sort_keys=True, separators=(",", ":")
-        )
+        MODEL=json.dumps(model, ensure_ascii=True, separators=(",", ":"))
         .replace("<", "\\u003c")
         .replace(">", "\\u003e")
         .replace("&", "\\u0026"),
@@ -362,7 +360,7 @@ def main():
     try:
         model = json.loads(args.spec.read_text(encoding="utf-8"))
         page, warnings = build(model)
-    except (TypeError, ValueError, OSError) as error:
+    except (TypeError, ValueError, OSError, RecursionError) as error:
         print(f"WARN {error}")
         return 1
     for warning in warnings:

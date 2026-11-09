@@ -147,10 +147,12 @@ blueprint-space 需要 Python 3.9 以上，可離線建置。輸出 PNG 與瀏�
 
 ```bash
 cd examples/juniper-commons
-python3 ../../skills/blueprint-space/scripts/space.py space.json index.html --strict
-python3 ../../skills/blueprint-space/scripts/check_space.py index.html check/
-python3 ../../skills/blueprint-space/scripts/render_png.py index.html space.png --view both
+python3 ../../skills/blueprint-space/scripts/space.py space.json dist/index.html --strict
+python3 ../../skills/blueprint-space/scripts/check_space.py dist/index.html check/
+python3 ../../skills/blueprint-space/scripts/render_png.py dist/index.html space.png --view both
 ```
+
+生成的 `dist/` 只放 `index.html`；`check/` 與 PNG 放在外面，發佈到 artifact.cafe 時只發佈 `dist/`。
 
 輸出 PNG 和 proof 需要 Playwright 和 Chromium。
 </details>

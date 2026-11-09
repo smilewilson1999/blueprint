@@ -97,19 +97,25 @@ function box(parent, size, at, mat) {
   parent.add(mesh);
   return mesh;
 }
+const slabMaterial = material("#c6bead");
+const baseMaterial = material("#e9e3d6");
+const floorMaterials = [
+  [slabMaterial, "#c6bead", "#514a41"],
+  [baseMaterial, "#e9e3d6", "#2b2824"],
+];
 const slab = new THREE.Mesh(
   new THREE.ExtrudeGeometry(shape(model.floor), {
     depth: 0.18,
     bevelEnabled: false,
   }),
-  material("#c6bead"),
+  slabMaterial,
 );
 slab.rotation.x = -Math.PI / 2;
 slab.position.y = -0.2;
 world.add(slab);
 const base = new THREE.Mesh(
   new THREE.ShapeGeometry(shape(model.floor)),
-  material("#e9e3d6"),
+  baseMaterial,
 );
 base.rotation.x = -Math.PI / 2;
 base.position.y = -0.015;
@@ -337,6 +343,99 @@ function project(point) {
     ((1 - p.y) * viewport.clientHeight) / 2,
   ];
 }
+function labelCandidates(room) {
+  const outline = room.outline;
+  const centre = centroid(outline);
+  const raw = room.label ? [room.label] : [];
+  raw.push(centre);
+  outline.forEach((point) => {
+    raw.push([
+      point[0] * 0.55 + centre[0] * 0.45,
+      point[1] * 0.55 + centre[1] * 0.45,
+    ]);
+  });
+  outline.forEach((point, index) => {
+    const next = outline[(index + 1) % outline.length];
+    const midpoint = [(point[0] + next[0]) / 2, (point[1] + next[1]) / 2];
+    raw.push([
+      midpoint[0] * 0.65 + centre[0] * 0.35,
+      midpoint[1] * 0.65 + centre[1] * 0.35,
+    ]);
+  });
+  const xs = outline.map((point) => point[0]);
+  const zs = outline.map((point) => point[1]);
+  [0.25, 0.5, 0.75].forEach((x) =>
+    [0.25, 0.5, 0.75].forEach((z) =>
+      raw.push([
+        Math.min(...xs) + (Math.max(...xs) - Math.min(...xs)) * x,
+        Math.min(...zs) + (Math.max(...zs) - Math.min(...zs)) * z,
+      ]),
+    ),
+  );
+  const seen = new Set();
+  return raw.filter((point) => {
+    const key = point.map((value) => value.toFixed(6)).join(",");
+    if (seen.has(key) || !pointInRoom(point, outline)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+function placeRoomLabels() {
+  const occupied = [];
+  const furniturePoints = furniture.map((piece) =>
+    project(
+      new THREE.Vector3(
+        piece.position[0],
+        piece.size[2] / 2,
+        piece.position[1],
+      ),
+    ),
+  );
+  rooms.forEach((room) => {
+    const label = labels.get(room.id);
+    let chosen = null;
+    for (const point of labelCandidates(room)) {
+      const [x, y] = project(new THREE.Vector3(point[0], 0.08, point[1]));
+      label.style.left = `${x}px`;
+      label.style.top = `${y}px`;
+      label.style.visibility = "visible";
+      const bounds = label.getBoundingClientRect();
+      const outside =
+        bounds.right < viewport.getBoundingClientRect().left ||
+        bounds.left > viewport.getBoundingClientRect().right ||
+        bounds.bottom < viewport.getBoundingClientRect().top ||
+        bounds.top > viewport.getBoundingClientRect().bottom;
+      const overlapsLabel = occupied.some(
+        (other) =>
+          bounds.left < other.right + 4 &&
+          bounds.right > other.left - 4 &&
+          bounds.top < other.bottom + 4 &&
+          bounds.bottom > other.top - 4,
+      );
+      const overlapsFurniture = furniturePoints.some(
+        ([fx, fy]) =>
+          fx >= bounds.left - 20 &&
+          fx <= bounds.right + 20 &&
+          fy >= bounds.top - 20 &&
+          fy <= bounds.bottom + 20,
+      );
+      if (!outside && !overlapsLabel && !overlapsFurniture) {
+        chosen = bounds;
+        break;
+      }
+    }
+    if (!chosen) {
+      const point =
+        labelCandidates(room)[0] || room.label || centroid(room.outline);
+      const [x, y] = project(new THREE.Vector3(point[0], 0.08, point[1]));
+      label.style.left = `${x}px`;
+      label.style.top = `${y}px`;
+      label.style.visibility = "visible";
+      chosen = label.getBoundingClientRect();
+    }
+    occupied.push(chosen);
+  });
+}
 function render() {
   const aspect = viewport.clientWidth / viewport.clientHeight;
   camera.left = (-frame * aspect) / (2 * zoom);
@@ -359,17 +458,7 @@ function render() {
   camera.updateProjectionMatrix();
   camera.updateMatrixWorld();
   renderer.render(scene, camera);
-  rooms.forEach((room) => {
-    const p = room.label || centroid(room.outline),
-      [x, y] = project(new THREE.Vector3(p[0], 0.08, p[1]));
-    const label = labels.get(room.id);
-    label.style.left = `${x}px`;
-    label.style.top = `${y}px`;
-    label.style.visibility =
-      x < 0 || y < 0 || x > viewport.clientWidth || y > viewport.clientHeight
-        ? "hidden"
-        : "visible";
-  });
+  placeRoomLabels();
   const rect = viewport.getBoundingClientRect();
   furniture.forEach((f) => {
     const row = rows.get(f.id),
@@ -527,9 +616,13 @@ function pointInRoom(point, outline) {
   return inside;
 }
 function finishPieceChange(f) {
-  const room = rooms.find((candidate) =>
-    pointInRoom(f.position, candidate.outline),
-  );
+  const current = rooms.find((candidate) => candidate.id === f.room);
+  const room =
+    (current && pointInRoom(f.position, current.outline) && current) ||
+    rooms.find(
+      (candidate) =>
+        candidate.id !== f.room && pointInRoom(f.position, candidate.outline),
+    );
   if (room) f.room = room.id;
   refreshRoomCounts();
   inspect(f.id);
@@ -543,9 +636,12 @@ function rotate(delta) {
 function setTheme(value) {
   root.dataset.theme = value;
   $("#theme").setAttribute("aria-pressed", String(value === "dark"));
+  floorMaterials.forEach(([mat, light, dark]) =>
+    mat.color.set(value === "dark" ? dark : light),
+  );
   roomMaterials.forEach(([mat, color]) => {
     mat.color.set(color);
-    if (value === "dark") mat.color.multiplyScalar(0.62);
+    if (value === "dark") mat.color.multiplyScalar(0.16);
   });
   makeWalls();
   render();
@@ -591,13 +687,17 @@ viewport.addEventListener("pointerdown", (event) => {
   viewport.setPointerCapture(event.pointerId);
   pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
   if (pointers.size === 2) {
+    const active = gesture;
+    if (active?.kind === "piece" && active.id) {
+      finishPieceChange(byId.get(active.id));
+    }
     gesture = { kind: "pinch", distance: distance(), mid: midpoint() };
     return;
   }
-  const id =
-      event.target.closest(".room-label")?.id.slice(11) ||
-      hit(event.clientX, event.clientY),
-    p = groundPoint(event.clientX, event.clientY);
+  const hitId = hit(event.clientX, event.clientY);
+  const labelId = event.target.closest(".room-label")?.id.slice(11);
+  const id = editing ? hitId || labelId : labelId || hitId;
+  const p = groundPoint(event.clientX, event.clientY);
   if (id) inspect(id);
   gesture = {
     kind:
@@ -672,12 +772,14 @@ viewport.addEventListener("contextmenu", (event) => event.preventDefault());
 viewport.addEventListener(
   "wheel",
   (event) => {
-    event.preventDefault();
-    zoom = THREE.MathUtils.clamp(
+    const nextZoom = THREE.MathUtils.clamp(
       zoom * Math.exp(-Math.max(-120, Math.min(120, event.deltaY)) * 0.003),
       0.35,
       8,
     );
+    if (Math.abs(nextZoom - zoom) < 1e-7) return;
+    event.preventDefault();
+    zoom = nextZoom;
     render();
   },
   { passive: false },
