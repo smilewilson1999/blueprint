@@ -200,6 +200,29 @@ def assert_labels_disjoint(page, context):
             )
 
 
+def assert_piece_centres_uncovered(page, context):
+    labels = page.locator(".room-label").evaluate_all(
+        """
+        elements => elements
+          .filter(element => getComputedStyle(element).visibility !== 'hidden')
+          .map(element => {
+            const rect = element.getBoundingClientRect();
+            return {left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, text: element.innerText};
+          })
+        """
+    )
+    pieces = page.locator(".piece-row").evaluate_all(
+        "elements => elements.map(element => ({id: element.id, point: JSON.parse(element.dataset.screen)}))"
+    )
+    for piece in pieces:
+        x, y = piece["point"]
+        assert not any(
+            label["left"] <= x <= label["right"]
+            and label["top"] <= y <= label["bottom"]
+            for label in labels
+        ), f"{context}: {piece['id']} centre is covered by a room label"
+
+
 def check_edge_cases(page, original, out):
     model = copy.deepcopy(original)
     names = {}
@@ -275,6 +298,7 @@ def main():
         expect(page.locator("#viewport canvas")).to_be_visible()
         page.evaluate("document.fonts.ready")
         assert_labels_disjoint(page, "desktop 3D")
+        assert_piece_centres_uncovered(page, "desktop 3D")
         ids = page.locator("[id]").evaluate_all(
             "(elements) => elements.map(element => element.id)"
         )
@@ -310,6 +334,7 @@ def main():
         page.keyboard.press("v")
         expect(page.locator("#view-plan")).to_have_attribute("aria-pressed", "true")
         assert_labels_disjoint(page, "desktop Plan")
+        assert_piece_centres_uncovered(page, "desktop Plan")
         page.keyboard.press("e")
         expect(page.locator("#edit")).to_have_attribute("aria-pressed", "true")
         node = page.locator(f"#space-piece-{piece['id']}")
@@ -466,10 +491,13 @@ def main():
         )
         mobile.goto(args.html.resolve().as_uri())
         expect(mobile.locator("#viewport canvas")).to_be_visible()
+        mobile.evaluate("document.fonts.ready")
         assert_labels_disjoint(mobile, "phone 3D")
+        assert_piece_centres_uncovered(mobile, "phone 3D")
         mobile.keyboard.press("v")
         expect(mobile.locator("#view-plan")).to_have_attribute("aria-pressed", "true")
         assert_labels_disjoint(mobile, "phone Plan")
+        assert_piece_centres_uncovered(mobile, "phone Plan")
         mobile.keyboard.press("v")
         assert mobile.evaluate("document.documentElement.scrollWidth <= innerWidth"), (
             "phone overflow"
@@ -502,13 +530,45 @@ def main():
             mobile.locator("#viewport").get_attribute("data-camera") != after_orbit
         ), "touch pinch did not zoom"
         mobile.screenshot(path=str(args.out / "touch-390.png"), full_page=True)
+        phone360 = browser.new_context(
+            viewport={"width": 360, "height": 800},
+            is_mobile=True,
+            has_touch=True,
+            device_scale_factor=1,
+        )
+        mobile360 = phone360.new_page()
+        mobile360.on("pageerror", lambda error: errors.append(str(error)))
+        mobile360.on(
+            "request",
+            lambda request: (
+                requests.append(request.url)
+                if not request.url.startswith(("file:", "data:", "blob:"))
+                else None
+            ),
+        )
+        mobile360.goto(args.html.resolve().as_uri())
+        expect(mobile360.locator("#viewport canvas")).to_be_visible()
+        mobile360.evaluate("document.fonts.ready")
+        assert_labels_disjoint(mobile360, "phone 360 3D")
+        assert_piece_centres_uncovered(mobile360, "phone 360 3D")
+        mobile360.keyboard.press("v")
+        expect(mobile360.locator("#view-plan")).to_have_attribute(
+            "aria-pressed", "true"
+        )
+        assert_labels_disjoint(mobile360, "phone 360 Plan")
+        assert_piece_centres_uncovered(mobile360, "phone 360 Plan")
+        assert mobile360.evaluate(
+            "document.documentElement.scrollWidth <= innerWidth"
+        ), "phone 360 overflow"
+        mobile360.close()
+        phone360.close()
         check_edge_cases(page, original, args.out)
         browser.close()
     assert not errors, errors
     assert not requests, requests
     print(
         "PASS orbit; V/Plan; E/edit; drag + grid; rotation; room/piece inspector; unchanged export identical HTML; moved export/rebuild + stable ids; "
-        f"{cross_result}; theme; touch orbit/pinch at 390px; zero page errors; zero external requests"
+        f"{cross_result}; theme; labels/piece centres at 360px; touch orbit/pinch at 390px; zero page errors; zero external requests"
     )
 
 

@@ -61,7 +61,7 @@ same inspector, with its id, dimensions, position and rotation.
 | Key | Meaning |
 | --- | --- |
 | `outline` | Required simple polygon, as for `floor`. Room zones must fit inside the floor and have no area overlaps; shared edges are fine. |
-| `label` | Optional `[x, z]` label anchor inside the room. Defaults to the mean of its vertices; set explicitly for concave zones. |
+| `label` | Optional preferred `[x, z]` label anchor inside the room. Without it, the builder starts from the mean of the vertices; set it for concave zones or another intentional first position. The viewer keeps this spot when clear and nudges or compacts the label only when it would cover furniture or another label. |
 
 Rooms color the floor; their outlines do not create walls. Unassigned floor
 area is circulation. Room membership is explicit through furniture's `room`.
