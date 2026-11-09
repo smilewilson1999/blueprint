@@ -200,27 +200,82 @@ def assert_labels_disjoint(page, context):
             )
 
 
-def assert_piece_centres_uncovered(page, context):
-    labels = page.locator(".room-label").evaluate_all(
-        """
-        elements => elements
-          .filter(element => getComputedStyle(element).visibility !== 'hidden')
-          .map(element => {
-            const rect = element.getBoundingClientRect();
-            return {left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, text: element.innerText};
-          })
-        """
-    )
+def assert_piece_centres_on_canvas(page, context):
     pieces = page.locator(".piece-row").evaluate_all(
         "elements => elements.map(element => ({id: element.id, point: JSON.parse(element.dataset.screen)}))"
     )
     for piece in pieces:
         x, y = piece["point"]
-        assert not any(
-            label["left"] <= x <= label["right"]
-            and label["top"] <= y <= label["bottom"]
-            for label in labels
-        ), f"{context}: {piece['id']} centre is covered by a room label"
+        element = page.evaluate(
+            "point => { const element = document.elementFromPoint(...point); return {tag: element?.tagName, id: element?.id}; }",
+            [x, y],
+        )
+        assert element["tag"] == "CANVAS", (
+            f"{context}: {piece['id']} centre hit {element} instead of canvas"
+        )
+
+
+def assert_visible_labels_in_rooms(page, model, context):
+    rooms = {room["id"]: room["outline"] for room in model.get("rooms", [])}
+    labels = page.locator(".room-label").evaluate_all(
+        """
+        elements => elements
+          .filter(element => getComputedStyle(element).visibility !== 'hidden')
+          .map(element => ({id: element.dataset.room, point: JSON.parse(element.dataset.floorPoint)}))
+        """
+    )
+    for label in labels:
+        assert label["id"] in rooms, f"{context}: unknown room label {label['id']}"
+        assert SPACE.inside(label["point"], rooms[label["id"]]), (
+            f"{context}: label {label['id']} floor point left its room"
+        )
+
+
+def assert_layout_state(page, model, context):
+    assert_piece_centres_on_canvas(page, context)
+    assert_visible_labels_in_rooms(page, model, context)
+    assert_labels_disjoint(page, context)
+
+
+def check_label_layouts(browser, html, model, errors, requests):
+    for width, height in ((1440, 1000), (1024, 900), (390, 844), (360, 800)):
+        context = browser.new_context(
+            viewport={"width": width, "height": height},
+            is_mobile=width < 500,
+            has_touch=width < 500,
+            device_scale_factor=1,
+        )
+        page = context.new_page()
+        page.set_default_timeout(10000)
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.on(
+            "request",
+            lambda request: (
+                requests.append(request.url)
+                if not request.url.startswith(("file:", "data:", "blob:"))
+                else None
+            ),
+        )
+        page.goto(html.resolve().as_uri())
+        expect(page.locator("#viewport canvas")).to_be_visible()
+        page.evaluate("document.fonts.ready")
+        assert_layout_state(page, model, f"{width} 3D load")
+        page.mouse.move(width / 2, height / 2)
+        page.mouse.wheel(0, 10000)
+        assert_layout_state(page, model, f"{width} 3D wheel-out")
+        page.set_viewport_size({"width": width - 16, "height": height})
+        page.wait_for_timeout(50)
+        assert_layout_state(page, model, f"{width} 3D resize")
+        page.keyboard.press("v")
+        expect(page.locator("#view-plan")).to_have_attribute("aria-pressed", "true")
+        assert_layout_state(page, model, f"{width} Plan load")
+        page.mouse.move((width - 16) / 2, height / 2)
+        page.mouse.wheel(0, 10000)
+        assert_layout_state(page, model, f"{width} Plan wheel-out")
+        page.set_viewport_size({"width": width, "height": height})
+        page.wait_for_timeout(50)
+        assert_layout_state(page, model, f"{width} Plan resize")
+        context.close()
 
 
 def check_edge_cases(page, original, out):
@@ -297,14 +352,15 @@ def main():
         page.goto(args.html.resolve().as_uri())
         expect(page.locator("#viewport canvas")).to_be_visible()
         page.evaluate("document.fonts.ready")
-        assert_labels_disjoint(page, "desktop 3D")
-        assert_piece_centres_uncovered(page, "desktop 3D")
+        original = json.loads(page.locator("#space-model").text_content())
+        check_label_layouts(browser, args.html, original, errors, requests)
+        assert_layout_state(page, original, "desktop 3D")
         ids = page.locator("[id]").evaluate_all(
             "(elements) => elements.map(element => element.id)"
         )
         assert len(ids) == len(set(ids)), "duplicate DOM ids break review anchors"
-        original = json.loads(page.locator("#space-model").text_content())
         room, piece = original.get("rooms", [])[0], original.get("furniture", [])[0]
+        room_row = page.locator(f"#space-zone-{room['id']}")
         label = page.locator(f"#space-room-{room['id']}")
         before = label.bounding_box()
         view = page.locator("#viewport").bounding_box()
@@ -324,7 +380,7 @@ def main():
         assert rebuilt.read_bytes() == args.html.read_bytes(), (
             "unchanged export changed the build"
         )
-        label.click()
+        room_row.click()
         expect(page.locator("#inspector")).to_contain_text(room["name"])
         expect(page.locator("#inspector")).to_contain_text(room["id"])
         page.locator(".inventory summary").click()
@@ -333,8 +389,7 @@ def main():
         expect(page.locator("#inspector")).to_contain_text(piece["id"])
         page.keyboard.press("v")
         expect(page.locator("#view-plan")).to_have_attribute("aria-pressed", "true")
-        assert_labels_disjoint(page, "desktop Plan")
-        assert_piece_centres_uncovered(page, "desktop Plan")
+        assert_layout_state(page, original, "desktop Plan")
         page.keyboard.press("e")
         expect(page.locator("#edit")).to_have_attribute("aria-pressed", "true")
         node = page.locator(f"#space-piece-{piece['id']}")
@@ -492,12 +547,10 @@ def main():
         mobile.goto(args.html.resolve().as_uri())
         expect(mobile.locator("#viewport canvas")).to_be_visible()
         mobile.evaluate("document.fonts.ready")
-        assert_labels_disjoint(mobile, "phone 3D")
-        assert_piece_centres_uncovered(mobile, "phone 3D")
+        assert_layout_state(mobile, original, "phone 3D")
         mobile.keyboard.press("v")
         expect(mobile.locator("#view-plan")).to_have_attribute("aria-pressed", "true")
-        assert_labels_disjoint(mobile, "phone Plan")
-        assert_piece_centres_uncovered(mobile, "phone Plan")
+        assert_layout_state(mobile, original, "phone Plan")
         mobile.keyboard.press("v")
         assert mobile.evaluate("document.documentElement.scrollWidth <= innerWidth"), (
             "phone overflow"
@@ -549,14 +602,12 @@ def main():
         mobile360.goto(args.html.resolve().as_uri())
         expect(mobile360.locator("#viewport canvas")).to_be_visible()
         mobile360.evaluate("document.fonts.ready")
-        assert_labels_disjoint(mobile360, "phone 360 3D")
-        assert_piece_centres_uncovered(mobile360, "phone 360 3D")
+        assert_layout_state(mobile360, original, "phone 360 3D")
         mobile360.keyboard.press("v")
         expect(mobile360.locator("#view-plan")).to_have_attribute(
             "aria-pressed", "true"
         )
-        assert_labels_disjoint(mobile360, "phone 360 Plan")
-        assert_piece_centres_uncovered(mobile360, "phone 360 Plan")
+        assert_layout_state(mobile360, original, "phone 360 Plan")
         assert mobile360.evaluate(
             "document.documentElement.scrollWidth <= innerWidth"
         ), "phone 360 overflow"
@@ -568,7 +619,7 @@ def main():
     assert not requests, requests
     print(
         "PASS orbit; V/Plan; E/edit; drag + grid; rotation; room/piece inspector; unchanged export identical HTML; moved export/rebuild + stable ids; "
-        f"{cross_result}; theme; labels/piece centres at 360px; touch orbit/pinch at 390px; zero page errors; zero external requests"
+        f"{cross_result}; theme; canvas piece centres + in-room disjoint labels at 1440/1024/390/360 in 3D and Plan after load/wheel/resize; touch orbit/pinch at 390px; zero page errors; zero external requests"
     )
 
 

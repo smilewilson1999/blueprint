@@ -29,7 +29,7 @@
   </div>
   <aside class="sidebar">
     <div class="panel-heading">Inspector <span id="selection-kind">space</span></div>
-    <div id="inspector" aria-live="polite"><p class="eyebrow">A place to make things</p><h2>Select a room or piece</h2><p>Click a label or an object to see its name, stable id and dimensions.</p></div>
+    <div id="inspector" aria-live="polite"><p class="eyebrow">A place to make things</p><h2>Select a room or piece</h2><p>Click a room or piece to see its name, stable id and dimensions.</p></div>
     <div id="edit-controls" hidden><button id="rotate-left">Rotate −15°</button><button id="rotate-right">Rotate +15°</button><p>Drag on the floor. Arrow keys move one grid step; R rotates 15°.</p></div>
     <p id="status" role="status">Layout ready</p>
     <div class="panel-heading">Rooms <span id="room-count"></span></div>
@@ -38,10 +38,9 @@
   </aside>
 </section>
 <div class="under"><p id="summary"></p><p>Metres · cutaway walls · concept layout</p></div>
-<footer><span>{{FOOTER}}</span><span>blueprint-space / offline spatial study</span></footer>
+<footer><div class="foot"><span>{{FOOTER}}</span><span>blueprint-space / offline spatial study</span></div><details class="licenses"><summary>three.js · MIT license</summary><pre>{{LICENSE}}</pre></details></footer>
 </main>
 <script type="application/json" id="space-model">{{MODEL}}</script>
-<details class="licenses"><summary>three.js · MIT license</summary><pre>{{LICENSE}}</pre></details>
 <script type="module">
 import * as THREE from 'data:text/javascript;base64,{{THREE}}';
 {{VIEWER}}

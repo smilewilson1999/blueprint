@@ -150,6 +150,7 @@ rooms.forEach((room, i) => {
     room,
     `space-room-${room.id}`,
   );
+  label.dataset.room = room.id;
   const meta = document.createElement("small");
   meta.className = "room-area";
   meta.textContent = `${area(room.outline).toFixed(0)} m²`;
@@ -347,7 +348,7 @@ function project(point) {
 function labelCandidates(room) {
   const outline = room.outline;
   const centre = centroid(outline);
-  const raw = [];
+  const raw = room.label ? [room.label] : [centre];
   raw.push(centre);
   outline.forEach((point) => {
     raw.push([
@@ -382,26 +383,11 @@ function labelCandidates(room) {
   });
 }
 function placeRoomLabels() {
-  const occupied = [];
-  const viewportRect = viewport.getBoundingClientRect();
-  const localRect = (label) => {
-    const bounds = label.getBoundingClientRect();
-    return {
-      left: bounds.left - viewportRect.left,
-      right: bounds.right - viewportRect.left,
-      top: bounds.top - viewportRect.top,
-      bottom: bounds.bottom - viewportRect.top,
-    };
-  };
-  const overlapArea = (first, second, padding = 0) => {
+  const overlapArea = (first, second) => {
     const width =
-      Math.min(first.right, second.right) -
-      Math.max(first.left, second.left) +
-      padding * 2;
+      Math.min(first.right, second.right) - Math.max(first.left, second.left);
     const height =
-      Math.min(first.bottom, second.bottom) -
-      Math.max(first.top, second.top) +
-      padding * 2;
+      Math.min(first.bottom, second.bottom) - Math.max(first.top, second.top);
     return width > 0 && height > 0 ? width * height : 0;
   };
   const furnitureRects = furniture.map((piece) => {
@@ -430,311 +416,75 @@ function placeRoomLabels() {
       bottom: Math.max(...corners.map(([, y]) => y)),
     };
   });
-  const furnitureCenters = furniture.map((piece) =>
-    project(
-      new THREE.Vector3(
-        piece.position[0],
-        piece.size[2] / 2,
-        piece.position[1],
-      ),
-    ),
-  );
+  const measurements = new Map();
   rooms.forEach((room) => {
     const label = labels.get(room.id);
-    const areaLabel = label.querySelector(".room-area");
-    if (areaLabel) areaLabel.hidden = false;
-    label.classList.remove("compact");
-    const explicit = Boolean(room.label);
-    const candidates = labelCandidates(room);
-    const evaluate = (point, dx = 0, dy = 0) => {
-      const [x, y] = project(new THREE.Vector3(point[0], 0.08, point[1]));
-      label.style.left = `${x + dx}px`;
-      label.style.top = `${y + dy}px`;
-      label.style.visibility = "visible";
-      const bounds = localRect(label);
-      const outside =
-        bounds.right < 0 ||
-        bounds.left > viewport.clientWidth ||
-        bounds.right > viewport.clientWidth ||
-        bounds.bottom < 0 ||
-        bounds.top > viewport.clientHeight ||
-        bounds.bottom > viewport.clientHeight;
-      const labelOverlap = occupied.reduce(
-        (total, other) => total + overlapArea(bounds, other, 2),
-        0,
-      );
-      const furnitureOverlap = furnitureRects.reduce(
-        (total, other) => total + overlapArea(bounds, other, 4),
-        0,
-      );
-      const coveredCenters = furnitureCenters.reduce(
-        (total, [x, y]) =>
-          total +
-          (x >= bounds.left &&
-          x <= bounds.right &&
-          y >= bounds.top &&
-          y <= bounds.bottom
-            ? 1
-            : 0),
-        0,
-      );
-      return {
-        point,
-        bounds,
-        outside,
-        labelOverlap,
-        furnitureOverlap,
-        coveredCenters,
-        dx,
-        dy,
-      };
-    };
-    const nudge = [
-      [0, -24],
-      [0, 24],
-      [-24, 0],
-      [24, 0],
-      [-24, -24],
-      [24, -24],
-      [-24, 24],
-      [24, 24],
-      [0, -48],
-      [0, 48],
-      [-48, 0],
-      [48, 0],
-      [-48, -48],
-      [48, -48],
-      [-48, 48],
-      [48, 48],
-      [0, -72],
-      [0, 72],
-      [-72, 0],
-      [72, 0],
-    ];
-    const nudgeClear = (point) => {
-      for (const [dx, dy] of nudge) {
-        const candidate = evaluate(point, dx, dy);
-        if (
-          !candidate.outside &&
-          candidate.labelOverlap === 0 &&
-          candidate.furnitureOverlap === 0
-        ) {
-          return candidate;
-        }
-      }
-      return null;
-    };
-    if (explicit) {
-      let chosen = evaluate(room.label);
-      if (
-        chosen.outside ||
-        chosen.labelOverlap > 0 ||
-        chosen.furnitureOverlap > 0
-      ) {
-        chosen = nudgeClear(room.label) || chosen;
-        if (
-          chosen.outside ||
-          chosen.labelOverlap > 0 ||
-          chosen.furnitureOverlap > 0
-        ) {
-          for (const point of labelCandidates(room)) {
-            const candidate = evaluate(point);
-            if (
-              !candidate.outside &&
-              candidate.labelOverlap === 0 &&
-              candidate.furnitureOverlap === 0
-            ) {
-              chosen = candidate;
-              break;
-            }
-          }
-        }
-        if (
-          chosen.outside ||
-          chosen.labelOverlap > 0 ||
-          chosen.furnitureOverlap > 0
-        ) {
-          if (areaLabel) areaLabel.hidden = true;
-          label.classList.add("compact");
-          chosen = evaluate(room.label);
-          chosen = nudgeClear(room.label) || chosen;
-          if (
-            chosen.outside ||
-            chosen.labelOverlap > 0 ||
-            chosen.furnitureOverlap > 0
-          ) {
-            for (const point of labelCandidates(room)) {
-              const candidate = evaluate(point);
-              if (
-                !candidate.outside &&
-                candidate.labelOverlap === 0 &&
-                candidate.furnitureOverlap === 0
-              ) {
-                chosen = candidate;
-                break;
-              }
-            }
-          }
-          if (
-            chosen.outside ||
-            chosen.labelOverlap > 0 ||
-            chosen.furnitureOverlap > 0
-          ) {
-            let leastConflict = null;
-            for (const point of labelCandidates(room)) {
-              const candidate = evaluate(point);
-              if (
-                !candidate.outside &&
-                (!leastConflict ||
-                  candidate.labelOverlap < leastConflict.labelOverlap ||
-                  (candidate.labelOverlap === leastConflict.labelOverlap &&
-                    (candidate.coveredCenters < leastConflict.coveredCenters ||
-                      (candidate.coveredCenters ===
-                        leastConflict.coveredCenters &&
-                        candidate.furnitureOverlap <
-                          leastConflict.furnitureOverlap))))
-              ) {
-                leastConflict = candidate;
-              }
-            }
-            if (leastConflict) chosen = leastConflict;
-          }
-        }
-      }
-      occupied.push(chosen.bounds);
-      return;
-    }
-    let chosen = null;
-    for (const point of candidates) {
-      const result = evaluate(point);
-      if (
-        !result.outside &&
-        result.labelOverlap === 0 &&
-        result.furnitureOverlap === 0
-      ) {
-        chosen = result;
-        break;
-      }
-      if (
-        !chosen ||
-        result.outside < chosen.outside ||
-        (result.outside === chosen.outside &&
-          (result.labelOverlap < chosen.labelOverlap ||
-            (result.labelOverlap === chosen.labelOverlap &&
-              result.furnitureOverlap < chosen.furnitureOverlap)))
-      ) {
-        chosen = result;
-      }
-    }
-    if (!chosen) {
-      chosen = evaluate(centroid(room.outline));
-    }
-    if (chosen && chosen.labelOverlap > 0) {
-      chosen = nudgeClear(chosen.point) || chosen;
-    }
-    if (chosen && chosen.labelOverlap > 0 && areaLabel) {
-      areaLabel.hidden = true;
-      label.classList.add("compact");
-      chosen = evaluate(chosen.point, chosen.dx, chosen.dy);
-      if (chosen.labelOverlap > 0) {
-        chosen = nudgeClear(chosen.point) || chosen;
-      }
-    }
-    occupied.push(chosen.bounds);
+    const measure = label.cloneNode(true);
+    measure.removeAttribute("id");
+    measure.style.visibility = "hidden";
+    measure.style.left = "0px";
+    measure.style.top = "0px";
+    $("#labels").append(measure);
+    const areaLabel = measure.querySelector(".room-area");
+    const full = measure.getBoundingClientRect();
+    if (areaLabel) areaLabel.hidden = true;
+    measure.classList.add("compact");
+    const name = measure.getBoundingClientRect();
+    measure.remove();
+    measurements.set(room.id, {
+      full: { width: full.width, height: full.height },
+      name: { width: name.width, height: name.height },
+    });
   });
-  const repaired = [];
-  const repairOffsets = [
-    [0, 0],
-    [0, -24],
-    [0, 24],
-    [-24, 0],
-    [24, 0],
-    [-48, 0],
-    [48, 0],
-    [0, -48],
-    [0, 48],
-    [-72, 0],
-    [72, 0],
-    [0, -72],
-    [0, 72],
-  ];
-  rooms.forEach((room) => {
+  const occupied = [];
+  const ordered = [...rooms].sort(
+    (first, second) => area(second.outline) - area(first.outline),
+  );
+  ordered.forEach((room) => {
     const label = labels.get(room.id);
     const areaLabel = label.querySelector(".room-area");
-    const baseLeft = Number.parseFloat(label.style.left);
-    const baseTop = Number.parseFloat(label.style.top);
-    const choose = () => {
-      let best = null;
-      for (const [dx, dy] of repairOffsets) {
-        label.style.left = `${baseLeft + dx}px`;
-        label.style.top = `${baseTop + dy}px`;
-        const bounds = localRect(label);
-        const outside =
+    let chosen = null;
+    for (const compact of [false, true]) {
+      const size = measurements.get(room.id)[compact ? "name" : "full"];
+      for (const point of labelCandidates(room)) {
+        const [x, y] = project(new THREE.Vector3(point[0], 0.08, point[1]));
+        const bounds = {
+          left: x - size.width / 2,
+          right: x + size.width / 2,
+          top: y - size.height / 2,
+          bottom: y + size.height / 2,
+        };
+        if (
           bounds.left < 0 ||
           bounds.right > viewport.clientWidth ||
           bounds.top < 0 ||
-          bounds.bottom > viewport.clientHeight;
-        const labelOverlap = repaired.reduce(
+          bounds.bottom > viewport.clientHeight ||
+          occupied.some((other) => overlapArea(bounds, other))
+        )
+          continue;
+        const furnitureOverlap = furnitureRects.reduce(
           (total, other) => total + overlapArea(bounds, other),
           0,
         );
-        const furnitureOverlap = furnitureRects.reduce(
-          (total, other) => total + overlapArea(bounds, other, 4),
-          0,
-        );
-        const coveredCenters = furnitureCenters.reduce(
-          (total, [x, y]) =>
-            total +
-            (x >= bounds.left &&
-            x <= bounds.right &&
-            y >= bounds.top &&
-            y <= bounds.bottom
-              ? 1
-              : 0),
-          0,
-        );
-        const candidate = {
-          bounds,
-          outside,
-          labelOverlap,
-          furnitureOverlap,
-          coveredCenters,
-        };
-        if (
-          !best ||
-          Number(outside) < Number(best.outside) ||
-          (outside === best.outside &&
-            (labelOverlap < best.labelOverlap ||
-              (labelOverlap === best.labelOverlap &&
-                (coveredCenters < best.coveredCenters ||
-                  (coveredCenters === best.coveredCenters &&
-                    furnitureOverlap < best.furnitureOverlap)))))
-        ) {
-          best = candidate;
-        }
-        if (
-          !outside &&
-          labelOverlap === 0 &&
-          furnitureOverlap === 0 &&
-          coveredCenters === 0
-        ) {
-          return candidate;
+        if (!chosen || furnitureOverlap < chosen.furnitureOverlap) {
+          chosen = { point, x, y, bounds, compact, furnitureOverlap };
         }
       }
-      return best;
-    };
-    let placement = choose();
-    if (
-      placement.outside ||
-      placement.labelOverlap > 0 ||
-      placement.furnitureOverlap > 0 ||
-      placement.coveredCenters > 0
-    ) {
-      if (areaLabel) areaLabel.hidden = true;
-      label.classList.add("compact");
-      placement = choose();
+      if (chosen) break;
     }
-    repaired.push(placement.bounds);
+    if (chosen) {
+      label.hidden = false;
+      label.style.visibility = "visible";
+      label.style.left = `${chosen.x}px`;
+      label.style.top = `${chosen.y}px`;
+      label.dataset.floorPoint = JSON.stringify(chosen.point);
+      label.classList.toggle("compact", chosen.compact);
+      if (areaLabel) areaLabel.hidden = chosen.compact;
+      occupied.push(chosen.bounds);
+    } else {
+      label.style.visibility = "hidden";
+      label.dataset.floorPoint = "";
+    }
   });
 }
 function render() {
