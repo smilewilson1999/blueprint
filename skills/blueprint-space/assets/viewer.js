@@ -480,9 +480,12 @@ function placeRoomLabels() {
       label.style.top = `${chosen.y}px`;
       label.dataset.floorPoint = JSON.stringify(chosen.point);
       const viewportRect = viewport.getBoundingClientRect();
+      const [screenX, screenY] = project(
+        new THREE.Vector3(chosen.point[0], 0.08, chosen.point[1]),
+      );
       label.dataset.screen = JSON.stringify([
-        chosen.x + viewportRect.left,
-        chosen.y + viewportRect.top,
+        screenX + viewportRect.left,
+        screenY + viewportRect.top,
       ]);
       label.classList.toggle("compact", chosen.compact);
       if (areaLabel) areaLabel.hidden = chosen.compact;
