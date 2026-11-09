@@ -90,8 +90,9 @@ requests. It downloads an unchanged JSON and requires its rebuilt HTML to be
 identical, then downloads edited JSON and requires moved positions, room
 assignments and ids to survive rebuilding. If the model has one room or no
 free grid-snapped cross-room spot, the cross-room case is reported as skipped;
-the other checks still run. `check/` holds the downloaded files and browser
-proofs.
+the other checks still run. It also checks visible label geometry against its
+projected floor point, room outline and viewport bounds across both views and
+phone sizes. `check/` holds the downloaded files and browser proofs.
 
 Controls: drag empty space to orbit in 3D or pan in Plan; right-drag or
 Shift-drag pans in 3D; scroll or pinch zooms; Fit / `0` reframes. One finger
