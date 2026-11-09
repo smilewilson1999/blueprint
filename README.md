@@ -13,16 +13,18 @@ Describe what you're building in a sentence. Your agent draws it as an interacti
 
 </div>
 
-## Two skills
+## Three skills
 
 | Skill | Draws |
 | --- | --- |
 | **blueprint** | Software architecture: services, request paths, cloud infrastructure |
 | **blueprint-teardown** | Physical things, exploded: chip packages, boards, devices |
+| **blueprint-space** | Physical spaces: offices, floor plans, rooms and editable furniture layouts |
 
 ```bash
 npx skills add smilewilson1999/blueprint --skill blueprint
 npx skills add smilewilson1999/blueprint --skill blueprint-teardown
+npx skills add smilewilson1999/blueprint --skill blueprint-space
 ```
 
 They work with Claude Code, Codex, Cursor and [any agent that supports skills](https://agentskills.io). In the Claude apps, upload the skill's zip from [Releases](https://github.com/smilewilson1999/blueprint/releases/latest). Then just ask:
@@ -85,11 +87,20 @@ They work with Claude Code, Codex, Cursor and [any agent that supports skills](h
       <p><b>Chip package, with blueprint-teardown</b><br><sub>A CoWoS-style package, assembled and exploded. Sliders for HBM stacks and DRAM layers; SVG, PNG and PDF downloads. A concept with invented dimensions.</sub></p>
     </td>
   </tr>
+  <tr>
+    <td colspan="2" valign="top">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/space-dark.png">
+        <img src="docs/space.png" alt="Juniper Commons, a fictional co-working office in 3D with six named rooms, furniture, a Plan toggle, Edit layout and JSON export" width="100%">
+      </picture>
+      <p><b>A space to rearrange, with blueprint-space</b><br><sub>Juniper Commons, a fictional co-working office. Orbit in 3D, switch to Plan, inspect rooms and pieces, drag and rotate furniture on a grid, then export space.json to rebuild the layout. Works offline.</sub></p>
+    </td>
+  </tr>
 </table>
 
 ## Review on artifact.cafe
 
-Both skills produce one self-contained HTML file. Your agent publishes it to [artifact.cafe](https://artifact.cafe) and hands you a link. Reviewers click any part, label or text and leave a note, without an account. When the design changes, the agent publishes the next version and replies to each thread.
+All three skills produce one self-contained HTML file. Your agent publishes it to [artifact.cafe](https://artifact.cafe) and hands you a link. Reviewers click any part, label or text and leave a note, without an account. When the design changes, the agent publishes the next version and replies to each thread.
 
 <img src="docs/review.png" alt="Three guest comments on the checkout diagram: amber pins on Neon, the webhook label and Clerk, beside the comment list showing each thread with its target" width="100%">
 
@@ -99,7 +110,7 @@ Both skills produce one self-contained HTML file. Your agent publishes it to [ar
 <summary><b>Light and dark</b></summary>
 <br>
 
-Every diagram ships both themes and follows the reader's system setting. Tiles stay light so each logo keeps its own colors.
+Every diagram ships both themes and follows the reader's system setting. Architecture tiles stay light so each logo keeps its own colors.
 
 <img src="docs/light-dark.png" alt="The docs chatbot diagram cut diagonally: light theme on the upper left, dark theme on the lower right" width="100%">
 </details>
@@ -132,6 +143,17 @@ npm install && npm run build    # dist/index.html
 npm run film                    # optional demo video; needs Python Playwright and ffmpeg
 ```
 
+blueprint-space needs Python 3.9+ and builds offline. Rendering and browser checks also need Python Playwright with Chromium:
+
+```bash
+cd examples/juniper-commons
+python3 ../../skills/blueprint-space/scripts/space.py space.json dist/index.html --strict
+python3 ../../skills/blueprint-space/scripts/check_space.py dist/index.html check/
+python3 ../../skills/blueprint-space/scripts/render_png.py dist/index.html space.png --view both
+```
+
+The generated `dist/` folder contains only `index.html`; keep `check/` and PNGs outside it and publish only `dist/` to artifact.cafe.
+
 PNG export and proofs use Playwright with Chromium.
 </details>
 
@@ -141,5 +163,7 @@ blueprint started as a fork of [stack-diagram](https://github.com/caru-ini/stack
 
 - Code and docs: MIT, see [`LICENSE`](LICENSE).
 - The teardown engine in `skills/blueprint-teardown/engine/`: MIT, Copyright (c) 2026 Jakub Krehel, see [`engine/LICENSE`](skills/blueprint-teardown/engine/LICENSE).
+- Vendored three.js **0.170.0** in `skills/blueprint-space/assets/vendor/`: MIT, see [`vendor/LICENSE`](skills/blueprint-space/assets/vendor/LICENSE) and [`vendor/PATCHES.md`](skills/blueprint-space/assets/vendor/PATCHES.md).
 - Bundled fonts (Inter, IBM Plex Mono): SIL Open Font License 1.1, see [`assets/fonts`](skills/blueprint/assets/fonts).
+- The space skill bundles the same OFL fonts under [`blueprint-space/assets/fonts`](skills/blueprint-space/assets/fonts).
 - Logos are **not** bundled. They are downloaded at build time from the sources above. The images in `docs/` show third-party logos. All brand names and logos are trademarks of their respective owners; their use in a diagram does not imply endorsement.

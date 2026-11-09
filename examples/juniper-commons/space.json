@@ -1,0 +1,73 @@
+{
+  "title": "Juniper Commons",
+  "kicker": "juniper / co-working / spatial study 01",
+  "lede": "A quiet place for focused work, shared ideas and a good coffee. Six zones around an open studio, ready to rearrange.",
+  "footer": "Fictional office · invented dimensions · no real address",
+  "units": "m",
+  "grid": 0.25,
+  "floor": [[0, 0], [16, 0], [16, 11], [0, 11]],
+  "rooms": [
+    {"id": "studio", "name": "Open studio", "outline": [[0, 0], [10, 0], [10, 7], [0, 7]], "label": [4.7, 0.85], "color": "#dce2d2", "note": "Eight individual desks with shared circulation along the south side."},
+    {"id": "meeting", "name": "Meeting room", "outline": [[10, 0], [16, 0], [16, 4], [10, 4]], "label": [13, 0.8], "color": "#d5e0e2", "note": "A table for four, separated from the work area."},
+    {"id": "quiet", "name": "Quiet room", "outline": [[10, 4], [16, 4], [16, 7], [10, 7]], "label": [13, 4.7], "color": "#e7dbc8", "note": "Two desks for concentrated individual work."},
+    {"id": "lounge", "name": "Lounge", "outline": [[0, 7], [8, 7], [8, 11], [0, 11]], "label": [4, 7.7], "color": "#ddd3ca", "note": "Informal conversations and a soft place to land."},
+    {"id": "pantry", "name": "Coffee bar", "outline": [[8, 7], [12, 7], [12, 11], [8, 11]], "label": [10, 7.7], "color": "#dbe0d0", "note": "A coffee counter with a small standing table."},
+    {"id": "arrival", "name": "Arrival", "outline": [[12, 7], [16, 7], [16, 11], [12, 11]], "label": [14, 7.7], "color": "#e6dfcf", "note": "A clear entry and a shelf for bags and supplies."}
+  ],
+  "walls": [
+    {"id": "north", "start": [0, 0], "end": [16, 0], "height": 2.8, "thickness": 0.15},
+    {"id": "east", "start": [16, 0], "end": [16, 11], "height": 2.8, "thickness": 0.15},
+    {"id": "south", "start": [0, 11], "end": [16, 11], "height": 2.8, "thickness": 0.15},
+    {"id": "west", "start": [0, 0], "end": [0, 11], "height": 2.8, "thickness": 0.15},
+    {"id": "studio-partition", "start": [10, 0], "end": [10, 7], "height": 2.8, "thickness": 0.15},
+    {"id": "meeting-partition", "start": [10, 4], "end": [16, 4], "height": 2.8, "thickness": 0.15}
+  ],
+  "doors": [
+    {"id": "entry", "wall": "south", "offset": 13.5, "width": 1.1, "height": 2.1},
+    {"id": "meeting-entry", "wall": "studio-partition", "offset": 2.6, "width": 1.1, "height": 2.1},
+    {"id": "quiet-entry", "wall": "studio-partition", "offset": 5.6, "width": 1.1, "height": 2.1}
+  ],
+  "windows": [
+    {"id": "studio-window", "wall": "north", "offset": 1, "width": 7.5, "height": 1.4, "sill": 0.7},
+    {"id": "meeting-window", "wall": "north", "offset": 11, "width": 3.5, "height": 1.4, "sill": 0.7},
+    {"id": "lounge-window", "wall": "west", "offset": 7.8, "width": 2.3, "height": 1.4, "sill": 0.7},
+    {"id": "quiet-window", "wall": "east", "offset": 4.7, "width": 1.6, "height": 1.4, "sill": 0.7}
+  ],
+  "furniture": [
+    {"id": "desk-01", "name": "Studio desk 01", "type": "desk", "room": "studio", "position": [1.7, 2.25], "size": [1.4, 0.7, 0.75], "rotation": 0},
+    {"id": "chair-01", "name": "Studio chair 01", "type": "chair", "room": "studio", "position": [1.7, 3.45], "size": [0.5, 0.5, 0.85], "rotation": 0},
+    {"id": "desk-02", "name": "Studio desk 02", "type": "desk", "room": "studio", "position": [4, 2.25], "size": [1.4, 0.7, 0.75], "rotation": 0},
+    {"id": "chair-02", "name": "Studio chair 02", "type": "chair", "room": "studio", "position": [4, 3.45], "size": [0.5, 0.5, 0.85], "rotation": 0},
+    {"id": "desk-03", "name": "Studio desk 03", "type": "desk", "room": "studio", "position": [6.3, 2.25], "size": [1.4, 0.7, 0.75], "rotation": 0},
+    {"id": "chair-03", "name": "Studio chair 03", "type": "chair", "room": "studio", "position": [6.3, 3.45], "size": [0.5, 0.5, 0.85], "rotation": 0},
+    {"id": "desk-04", "name": "Studio desk 04", "type": "desk", "room": "studio", "position": [8.6, 2.25], "size": [1.4, 0.7, 0.75], "rotation": 0},
+    {"id": "chair-04", "name": "Studio chair 04", "type": "chair", "room": "studio", "position": [8.6, 3.45], "size": [0.5, 0.5, 0.85], "rotation": 0},
+    {"id": "desk-05", "name": "Studio desk 05", "type": "desk", "room": "studio", "position": [1.7, 5], "size": [1.4, 0.7, 0.75], "rotation": 0},
+    {"id": "chair-05", "name": "Studio chair 05", "type": "chair", "room": "studio", "position": [1.7, 6.2], "size": [0.5, 0.5, 0.85], "rotation": 0},
+    {"id": "desk-06", "name": "Studio desk 06", "type": "desk", "room": "studio", "position": [4, 5], "size": [1.4, 0.7, 0.75], "rotation": 0},
+    {"id": "chair-06", "name": "Studio chair 06", "type": "chair", "room": "studio", "position": [4, 6.2], "size": [0.5, 0.5, 0.85], "rotation": 0},
+    {"id": "desk-07", "name": "Studio desk 07", "type": "desk", "room": "studio", "position": [6.3, 5], "size": [1.4, 0.7, 0.75], "rotation": 0},
+    {"id": "chair-07", "name": "Studio chair 07", "type": "chair", "room": "studio", "position": [6.3, 6.2], "size": [0.5, 0.5, 0.85], "rotation": 0},
+    {"id": "desk-08", "name": "Studio desk 08", "type": "desk", "room": "studio", "position": [8.6, 5], "size": [1.4, 0.7, 0.75], "rotation": 0},
+    {"id": "chair-08", "name": "Studio chair 08", "type": "chair", "room": "studio", "position": [8.6, 6.2], "size": [0.5, 0.5, 0.85], "rotation": 0},
+    {"id": "meeting-table", "name": "Gathering table", "type": "table", "room": "meeting", "position": [13, 2.3], "size": [2.3, 1.1, 0.75], "rotation": 0},
+    {"id": "meeting-chair-1", "name": "Meeting chair 1", "type": "chair", "room": "meeting", "position": [11.2, 2.3], "size": [0.5, 0.5, 0.85], "rotation": 270},
+    {"id": "meeting-chair-2", "name": "Meeting chair 2", "type": "chair", "room": "meeting", "position": [14.8, 2.3], "size": [0.5, 0.5, 0.85], "rotation": 90},
+    {"id": "meeting-chair-3", "name": "Meeting chair 3", "type": "chair", "room": "meeting", "position": [12.4, 3.35], "size": [0.5, 0.5, 0.85], "rotation": 0},
+    {"id": "meeting-chair-4", "name": "Meeting chair 4", "type": "chair", "room": "meeting", "position": [13.6, 3.35], "size": [0.5, 0.5, 0.85], "rotation": 0},
+    {"id": "focus-desk-1", "name": "Focus desk 1", "type": "desk", "room": "quiet", "position": [11.8, 5.7], "size": [1.4, 0.65, 0.75], "rotation": 0},
+    {"id": "focus-chair-1", "name": "Focus chair 1", "type": "chair", "room": "quiet", "position": [11.8, 6.5], "size": [0.5, 0.5, 0.85], "rotation": 0},
+    {"id": "focus-desk-2", "name": "Focus desk 2", "type": "desk", "room": "quiet", "position": [14.3, 5.7], "size": [1.4, 0.65, 0.75], "rotation": 0},
+    {"id": "focus-chair-2", "name": "Focus chair 2", "type": "chair", "room": "quiet", "position": [14.3, 6.5], "size": [0.5, 0.5, 0.85], "rotation": 0},
+    {"id": "lounge-sofa", "name": "Juniper sofa", "type": "sofa", "room": "lounge", "position": [3, 9.8], "size": [3.1, 0.95, 0.85], "rotation": 180},
+    {"id": "lounge-table", "name": "Low conversation table", "type": "table", "room": "lounge", "position": [3, 8.55], "size": [1.5, 0.65, 0.4], "rotation": 0},
+    {"id": "lounge-chair", "name": "Reading chair", "type": "chair", "room": "lounge", "position": [5.8, 9], "size": [0.8, 0.8, 0.9], "rotation": 90},
+    {"id": "coffee-counter", "name": "Coffee counter", "type": "counter", "room": "pantry", "position": [10, 10.35], "size": [3.1, 0.65, 0.95], "rotation": 0},
+    {"id": "coffee-table", "name": "Standing table", "type": "table", "room": "pantry", "position": [10, 8.8], "size": [1.6, 0.8, 1.05], "rotation": 0},
+    {"id": "arrival-shelf", "name": "Arrival shelf", "type": "shelf", "room": "arrival", "position": [15.5, 8.9], "size": [0.55, 1.8, 1.4], "rotation": 0},
+    {"id": "studio-plant", "name": "Studio fern", "type": "plant", "room": "studio", "position": [0.7, 0.85], "size": [0.65, 0.65, 1.1], "rotation": 0},
+    {"id": "lounge-plant", "name": "Lounge fig", "type": "plant", "room": "lounge", "position": [0.8, 9.8], "size": [0.8, 0.8, 1.6], "rotation": 0},
+    {"id": "entry-plant", "name": "Welcome fern", "type": "plant", "room": "arrival", "position": [12.7, 8.8], "size": [0.65, 0.65, 1.1], "rotation": 0}
+  ],
+  "metadata": {"concept": true, "description": "A fictional single-floor co-working office. All dimensions are invented; a layout prototype for discussion."}
+}

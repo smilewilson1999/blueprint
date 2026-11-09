@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="{{LANG}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+@font-face{font-family:Inter;src:url(data:font/woff2;base64,{{INTER}}) format('woff2');font-weight:100 900}
+@font-face{font-family:'IBM Plex Mono';src:url(data:font/woff2;base64,{{MONO}}) format('woff2');font-weight:400}
+{{STYLE}}
+</style>
+</head>
+<body>
+<main class="page">
+<header class="head"><div><p class="kicker">{{KICKER}}</p><h1>{{TITLE}}</h1></div><p class="lede">{{LEDE}}</p></header>
+<div class="toolbar">
+  <div class="segment" role="group" aria-label="View"><button id="view-3d" aria-pressed="true">3D</button><button id="view-plan" aria-pressed="false">Plan</button><kbd>V</kbd></div>
+  <div class="actions"><button id="edit" aria-pressed="false">Edit layout <kbd>E</kbd></button><button id="export">Export JSON</button><button id="theme" aria-label="Toggle dark theme" aria-pressed="false">◐</button></div>
+</div>
+<section class="workspace" aria-label="Space planner">
+  <div class="drawing">
+    <div class="drawing-bar"><span id="view-title">Spatial study / 3D</span><span id="area"></span></div>
+    <div id="viewport" tabindex="0" aria-label="Interactive space. Drag to orbit, right-drag to pan, scroll or pinch to zoom. V changes view; E edits furniture.">
+      <div id="labels"></div><p id="render-error" hidden></p>
+      <div class="view-tools"><button id="zoom-out" aria-label="Zoom out">−</button><button id="fit">Fit <kbd>0</kbd></button><button id="zoom-in" aria-label="Zoom in">+</button></div>
+      <div class="scale"><span></span><b id="scale-label">2 m</b></div>
+    </div>
+    <p id="hint">Drag to orbit · right-drag to pan · scroll to zoom</p>
+  </div>
+  <aside class="sidebar">
+    <div class="panel-heading">Inspector <span id="selection-kind">space</span></div>
+    <div id="inspector" aria-live="polite"><p class="eyebrow">A place to make things</p><h2>Select a room or piece</h2><p>Click a room or piece to see its name, stable id and dimensions.</p></div>
+    <div id="edit-controls" hidden><button id="rotate-left">Rotate −15°</button><button id="rotate-right">Rotate +15°</button><p>Drag on the floor. Arrow keys move one grid step; R rotates 15°.</p></div>
+    <p id="status" role="status">Layout ready</p>
+    <div class="panel-heading">Rooms <span id="room-count"></span></div>
+    <div id="room-list"></div>
+    <details class="inventory"><summary>Furniture <span id="piece-count"></span></summary><div id="piece-list"></div></details>
+  </aside>
+</section>
+<div class="under"><p id="summary"></p><p>Metres · cutaway walls · concept layout</p></div>
+<footer><div class="foot"><span>{{FOOTER}}</span><span>blueprint-space / offline spatial study</span></div><details class="licenses"><summary>three.js · MIT license</summary><pre>{{LICENSE}}</pre></details></footer>
+</main>
+<script type="application/json" id="space-model">{{MODEL}}</script>
+<script type="module">
+import * as THREE from 'data:text/javascript;base64,{{THREE}}';
+{{VIEWER}}
+</script>
+</body>
+</html>
