@@ -90,8 +90,8 @@ npx skills add smilewilson1999/blueprint --skill blueprint-space
   <tr>
     <td colspan="2" valign="top">
       <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="docs/space-dark.png">
-        <img src="docs/space.png" alt="虛構共享辦公室 Juniper Commons 的 3D 視圖，含六個具名空間、家具、平面圖切換、配置編輯與 JSON 匯出" width="100%">
+        <source media="(prefers-color-scheme: dark)" srcset="docs/space-gallery-dark.png">
+        <img src="docs/space-gallery.png" alt="虛構共享辦公室 Juniper Commons 的 3D 與 Plan 平面圖並排呈現，含六個具名空間與家具" width="100%">
       </picture>
       <p><b>可以重新配置的空間，用 blueprint-space 畫</b><br><sub>Juniper Commons，一間虛構的共享辦公室。旋轉 3D 視角、切換平面圖、點選房間與家具，沿格線拖曳或旋轉家具，再匯出 space.json 重新建置。可離線使用。</sub></p>
     </td>

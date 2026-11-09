@@ -90,8 +90,8 @@ Claude Code、Codex、Cursor など、[skills に対応したエージェント]
   <tr>
     <td colspan="2" valign="top">
       <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="docs/space-dark.png">
-        <img src="docs/space.png" alt="架空のコワーキングオフィス Juniper Commons。六つの部屋と家具を3Dで表示し、Plan、Edit layout、JSON書き出しを備える" width="100%">
+        <source media="(prefers-color-scheme: dark)" srcset="docs/space-gallery-dark.png">
+        <img src="docs/space-gallery.png" alt="架空のコワーキングオフィス Juniper Commons。六つの部屋と家具を3DとPlanで横に並べて表示" width="100%">
       </picture>
       <p><b>配置を変えられる空間（blueprint-space）</b><br><sub>架空のコワーキングオフィス Juniper Commons。3Dで回転し、平面図に切り替え、部屋や家具を選択。家具をグリッドに沿って移動・回転し、space.json に書き出して再ビルドできます。オフラインで動作します。</sub></p>
     </td>
