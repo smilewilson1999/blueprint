@@ -200,6 +200,10 @@ h1 {
   color: var(--muted);
   font: 9px/1.5 var(--mono);
 }
+.room-label.compact {
+  padding: 2px 2px;
+  font-size: 8px;
+}
 .view-tools {
   position: absolute;
   bottom: 16px;
@@ -349,6 +353,9 @@ dd {
   margin-right: 8px;
   background: var(--color);
 }
+[data-theme="dark"] .swatch {
+  filter: brightness(0.62) saturate(0.85);
+}
 .inventory {
   border-top: 1px solid var(--line);
   padding: 10px 16px;
@@ -453,6 +460,9 @@ footer {
   }
   .room-label small {
     font-size: 9px;
+  }
+  .room-label.compact {
+    min-height: 0;
   }
   .under,
   footer {

@@ -34,8 +34,10 @@ invented. The model is a layout study, not a construction drawing.
 5. Render light and dark PNGs in both views and look at them
 6. Publish to artifact.cafe for review when authorized (or deliver HTML / PNG)
 
-Commands below run from the installed skill directory; use absolute script
-paths when the project is elsewhere. The builder needs only Python's standard
+Commands below run from the project directory, with the installed skill's
+scripts called by path. Replace `/path/to/blueprint-space` with the installed
+skill directory. This keeps `dist/`, `check/` and PNGs in the project rather
+than inside the skill package. The builder needs only Python's standard
 library. Three.js **0.170.0** is vendored unchanged with its MIT license in
 `assets/vendor/`; fonts and the module are embedded, with no CDN at view time.
 
@@ -61,7 +63,7 @@ them to identify their comments.
 ## Step 3: Build
 
 ```bash
-python3 scripts/space.py space.json dist/index.html --strict
+python3 /path/to/blueprint-space/scripts/space.py space.json dist/index.html --strict
 ```
 
 Fix every `WARN`: overlaps, furniture outside its room or floor, furniture
@@ -77,7 +79,7 @@ Plan displays wall footprints. Windows appear within the visible cutaway.
 ## Step 4: Check it
 
 ```bash
-python3 scripts/check_space.py dist/index.html check/
+python3 /path/to/blueprint-space/scripts/check_space.py dist/index.html check/
 ```
 
 For a furnished space, this exercises orbit, V/Plan, E/edit, dragging the first
@@ -105,8 +107,8 @@ Keep that exported file; rebuilding the old source would discard the changes.
 ## Step 5: Look at it
 
 ```bash
-python3 scripts/render_png.py dist/index.html space.png --view both
-python3 scripts/render_png.py dist/index.html phone.png --view both --width 390 --height 844
+python3 /path/to/blueprint-space/scripts/render_png.py dist/index.html space.png --view both
+python3 /path/to/blueprint-space/scripts/render_png.py dist/index.html phone.png --view both --width 390 --height 844
 ```
 
 Each command writes four files: light and dark 3D, and `-plan` / `-plan-dark`.

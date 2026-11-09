@@ -176,6 +176,30 @@ def screen_references(model, anchor_id):
     return positions, x_ref["id"], z_ref["id"]
 
 
+def assert_labels_disjoint(page, context):
+    labels = page.locator(".room-label").evaluate_all(
+        """
+        elements => elements
+          .filter(element => getComputedStyle(element).visibility !== 'hidden')
+          .map(element => {
+            const rect = element.getBoundingClientRect();
+            return {left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, text: element.innerText};
+          })
+        """
+    )
+    for index, first in enumerate(labels):
+        for second in labels[index + 1 :]:
+            overlap = (
+                first["left"] < second["right"]
+                and first["right"] > second["left"]
+                and first["top"] < second["bottom"]
+                and first["bottom"] > second["top"]
+            )
+            assert not overlap, (
+                f"{context}: labels overlap: {first['text']!r} / {second['text']!r}"
+            )
+
+
 def check_edge_cases(page, original, out):
     model = copy.deepcopy(original)
     names = {}
@@ -250,6 +274,7 @@ def main():
         page.goto(args.html.resolve().as_uri())
         expect(page.locator("#viewport canvas")).to_be_visible()
         page.evaluate("document.fonts.ready")
+        assert_labels_disjoint(page, "desktop 3D")
         ids = page.locator("[id]").evaluate_all(
             "(elements) => elements.map(element => element.id)"
         )
@@ -284,6 +309,7 @@ def main():
         expect(page.locator("#inspector")).to_contain_text(piece["id"])
         page.keyboard.press("v")
         expect(page.locator("#view-plan")).to_have_attribute("aria-pressed", "true")
+        assert_labels_disjoint(page, "desktop Plan")
         page.keyboard.press("e")
         expect(page.locator("#edit")).to_have_attribute("aria-pressed", "true")
         node = page.locator(f"#space-piece-{piece['id']}")
@@ -440,6 +466,11 @@ def main():
         )
         mobile.goto(args.html.resolve().as_uri())
         expect(mobile.locator("#viewport canvas")).to_be_visible()
+        assert_labels_disjoint(mobile, "phone 3D")
+        mobile.keyboard.press("v")
+        expect(mobile.locator("#view-plan")).to_have_attribute("aria-pressed", "true")
+        assert_labels_disjoint(mobile, "phone Plan")
+        mobile.keyboard.press("v")
         assert mobile.evaluate("document.documentElement.scrollWidth <= innerWidth"), (
             "phone overflow"
         )
